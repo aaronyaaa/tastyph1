@@ -1,0 +1,72 @@
+/* Footer Styling */
+footer {
+    background-color: #00aaff; /* Light Grey Background */
+    padding: 50px 0;
+}
+
+footer img {
+    max-width: 100px; /* Logo size */
+}
+
+footer p {
+    font-size: 14px;
+    color: #555; /* Muted text color */
+}
+
+footer h5 {
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Quick Links Styling */
+footer .list-unstyled li {
+    margin-bottom: 8px;
+}
+
+footer .list-unstyled a {
+    color: #6c757d;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer .list-unstyled a:hover {
+    color: #343a40; /* Darker color on hover */
+}
+
+/* Social Media Icons */
+footer .social-icons a {
+    display: inline-block;
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+footer .social-icons a:hover {
+    transform: scale(1.1);
+}
+
+/* Copyright & Legal Links */
+footer .text-muted {
+    font-size: 13px;
+}
+
+footer .text-secondary {
+    font-size: 14px;
+    margin: 0 5px;
+}
+
+footer .text-secondary:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    footer .col-md-4 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    footer .social-icons {
+        text-align: center;
+    }
+}

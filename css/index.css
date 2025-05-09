@@ -1,0 +1,144 @@
+/* Body Styling */
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f9f2e7; /* Soft warm cream */
+    margin: 0;
+    margin-top: 5%;
+    padding: 20px;
+}
+
+/* Hero Section */
+.hero-container {
+    width: 100%;
+    margin: 0 auto;
+    margin-bottom: 30px;
+}
+
+/* Section Titles */
+.section-title {
+    font-size: 28px;
+    color: #7d4f2a; /* Earthy brown for theme */
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Filter Buttons */
+.filter-section .btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.filter-section .btn-group button {
+    background-color: #fd8c27;
+    color: white;
+    font-size: 16px;
+    padding: 8px 25px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.filter-section .btn-group button.active {
+    background-color: #e67e22;
+}
+
+/* Store and Supplier Card Styles */
+.store-list, .supplier-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+
+.store-card, .supplier-card {
+    position: relative;
+    width: 250px;
+    height: 300px;
+    background-color: #fff8e5;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-size: cover;  /* Ensure the image fully covers the card */
+    background-position: center;  /* Keep the focus on the center of the image */
+}
+
+.store-card:hover, .supplier-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Overlay content */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.store-card:hover .overlay, .supplier-card:hover .overlay {
+    opacity: 1;
+}
+
+/* Store and Supplier Information */
+.store-info, .supplier-info {
+    text-align: center;
+}
+
+.store-name, .supplier-name {
+    font-size: 20px;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.view-btn {
+    background-color: #7D00FF;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.view-btn:hover {
+    background-color: #5b00cc;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .store-card, .supplier-card {
+        width: 220px;
+    }
+}
+
+@media (max-width: 576px) {
+    .store-card, .supplier-card {
+        width: 100%;
+    }
+}
+/* Carousel Styling */
+#imageCarousel {
+    width: 100%;
+    max-width: 1000px;
+    aspect-ratio: 32 / 9;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

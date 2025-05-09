@@ -1,0 +1,93 @@
+.body {
+    background-color: #f0f0f0; /* Light gray */
+    color: #333; /* Dark gray text for readability */
+    font-family: Arial, sans-serif;
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-image: url('../images/tastyph.png'); /* Updated path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+/* Initially Hidden Black Transparent Overlay */
+.hero::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* 60% Black Transparency */
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.5s ease-in-out; /* Smooth transition effect */
+}
+
+/* Show Overlay on Hover */
+.hero:hover::before {
+    opacity: 1; /* Appears when hovering */
+}
+
+/* Content Styling */
+.container {
+    position: relative; /* Ensures it's above the overlay */
+    z-index: 1;
+}
+
+.title {
+    font-size: 5rem;
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 20px;
+    transition: color 0.3s ease-in-out; /* Smooth text color transition */
+}
+
+/* Optional: Change text color slightly on hover */
+.hero:hover .title {
+    color: #ffcc99; /* Light peach color */
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: #ff6600; /* Adjust color if needed */
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+.button:hover {
+    background-color: #cc5500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .title {
+        font-size: 3rem; /* Smaller text for mobile */
+    }
+    .button {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 2rem; /* Even smaller for very small screens */
+    }
+    .button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+}

@@ -1,0 +1,153 @@
+/* 🌟 General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* 📦 Container */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 📸 Ingredient Image Section */
+.main-image {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.main-image img {
+    width: 100%;
+    height: auto;
+    max-height: 500px; 
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 📖 Ingredient Details */
+.ingredient-title {
+    font-size: 70px;
+    font-weight: bold;
+    color: #333;
+}
+
+.ingredient-price {
+    font-size: 24px;
+    color: #ff5722;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.ingredient-description {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #555;
+    margin-top: 15px;
+}
+
+/* 🛒 Quantity Selector */
+.quantity-selector {
+    margin-top: 20px;
+}
+
+.quantity-selector .input-group {
+    display: flex;
+    align-items: center;
+    width: 150px;
+}
+
+.quantity-selector .btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.quantity-selector .btn:hover {
+    background-color: #e64a19;
+}
+
+.quantity-selector input {
+    width: 50px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* 🏷️ Buttons */
+.btn-warning,
+.btn-primary {
+    font-size: 18px;
+    padding: 10px 20px;
+    width: 48%;
+    transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+.btn-warning {
+    background-color: #ff9800;
+    border: none;
+}
+
+.btn-warning:hover {
+    background-color: #e68900;
+    transform: scale(1.05);
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* 🏭 Supplier Information */
+.supplier-info {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-top: 30px;
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.supplier-info img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+/* 📏 Responsive Design */
+@media (max-width: 992px) {
+    .row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .col-md-5,
+    .col-md-7 {
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-warning,
+    .btn-primary {
+        width: 100%;
+        margin-top: 10px;
+    }
+}
+.variant-card.active-variant {
+    border: 3px solid darkviolet !important;
+    background-color: #eaf4ff;
+}

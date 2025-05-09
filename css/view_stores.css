@@ -1,0 +1,192 @@
+/* Supplier Profile Section */
+.store-profile {
+    background: #343a40;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+/* Supplier Profile Image */
+.store-profile img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+/* Supplier Details */
+.store-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Supplier Name */
+.store-details h1 {
+    font-size: 50px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Description & Address */
+.store-details p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Buttons Row */
+.buttons-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+/* Supplier Info Button */
+.store-info-btn {
+    background-color: #FFD700;
+    color: black;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.store-info-btn:hover {
+    background-color: #E6C200;
+}
+
+/* Ingredient Cards */
+.ingredient-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.ingredient-link:hover .card {
+    transform: scale(1.05);
+    transition: 0.3s ease-in-out;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Ingredient Card */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Ingredient Image */
+.card img {
+    object-fit: cover;
+    height: 200px;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Ingredient Details */
+.card-body {
+    text-align: center;
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.card-body p {
+    font-size: 16px;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Grid Layout */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Responsive Product Cards */
+@media (max-width: 992px) {
+    .col-md-3 {
+        flex: 0 0 48%;
+        max-width: 48%;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .store-profile {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .buttons-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .store-profile img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .store-details h1 {
+        font-size: 28px;
+    }
+
+    .store-details p {
+        font-size: 14px;
+    }
+
+    .store-info-btn {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .store-profile img {
+        width: 80px;
+        height: 80px;
+    }
+
+    .store-details h1 {
+        font-size: 24px;
+    }
+
+    .store-details p {
+        font-size: 13px;
+    }
+
+    .store-info-btn,
+    .btn-primary {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+}

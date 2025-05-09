@@ -1,0 +1,97 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 40px;
+}
+
+/* Container for Settings Form */
+.container {
+    max-width: 800px;
+    margin: auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styles */
+h2.section-header {
+    text-align: center;
+    font-size: 28px;
+    color: #7d4f2a;
+    margin-bottom: 30px;
+}
+
+h3.section-title {
+    font-size: 22px;
+    color: #7d4f2a;
+    margin-bottom: 20px;
+}
+
+/* Profile Photo */
+.profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    margin-bottom: 20px;
+}
+
+/* Form Input Fields */
+.form-control {
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+/* Submit Button */
+.btn-primary {
+    background-color: #fd8c27;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    border: none;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #e67e22;
+}
+
+/* Tabs */
+.nav-tabs {
+    border-bottom: 2px solid #fd8c27;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #fd8c27;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #fd8c27;
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Responsive Design for Small Screens */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+        width: 90%;
+    }
+
+    .form-control {
+        font-size: 14px;
+    }
+}

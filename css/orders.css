@@ -1,0 +1,39 @@
+/* Order Dropdown */
+.order-dropdown {
+    position: relative;
+}
+
+.order-dropdown .dropdown-toggle {
+    background-color: #6c757d;
+    border: none;
+}
+
+.order-dropdown .dropdown-menu {
+    min-width: 150px;
+}
+
+/* Order Cards */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    text-align: center;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Order Status Colors */
+.text-warning { color: #ffc107; }
+.text-success { color: #28a745; }
+.text-danger { color: #dc3545; }

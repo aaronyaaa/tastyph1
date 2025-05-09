@@ -1,0 +1,101 @@
+/* styles.css */
+
+/* Overall body styling */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Heading Style */
+h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #343a40;
+    margin-bottom: 30px;
+}
+
+/* Request Card Styles */
+.request-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.request-card:hover {
+    transform: scale(1.05);
+}
+
+.request-card .card-body {
+    padding: 20px;
+}
+
+.request-card .card-title {
+    font-size: 2.5rem; /* Increased size */
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+/* Status Styling */
+.request-card .card-title.approved {
+    color: #28a745; /* Green */
+    font-size: 3rem; /* Bigger text */
+}
+
+.request-card .card-title.rejected {
+    color: #dc3545; /* Red */
+    font-size: 3rem; /* Bigger text */
+}
+
+.request-card .card-title.pending {
+    color: #ffc107; /* Yellow */
+    font-size: 3rem; /* Bigger text */
+}
+
+.request-card .card-subtitle {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+.request-card .card-text {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Highlight approved/rejected cards */
+.request-card.approved {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.request-card.rejected {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.request-card.pending {
+    border-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+/* Modal Styles */
+.modal-body {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Image styles */
+.card-img {
+    width: 100%;
+    height: auto;
+    border-right: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+}

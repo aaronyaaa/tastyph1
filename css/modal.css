@@ -1,0 +1,88 @@
+/* General modal styles */
+.modal-dialog {
+    max-width: 75%; /* Adjust modal width */
+    margin: 1.75rem auto;
+    border-radius: 8px;
+}
+
+/* Increase max width for large screens */
+
+
+/* Modal Content */
+.modal-content {
+    border-radius: 10px;
+    border: none;
+}
+
+/* Modal Header */
+.modal-header {
+    background-color: #6a0dad; /* Dark Violet */
+    color: white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-title {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Input Fields - Compressed */
+.modal-body .form-control,
+.modal-body .form-select {
+    font-size: 0.9rem; /* Slightly smaller font */
+    padding: 6px 10px; /* Reduced padding for compression */
+    height: 35px; /* Reduced height */
+    border-radius: 4px;
+}
+
+/* Reduce space between fields */
+.modal-body .row {
+    margin-bottom: 8px;
+}
+
+/* Reduce padding inside modal */
+.modal-body {
+    padding: 20px;
+}
+
+/* Reduce modal footer padding */
+.modal-footer {
+    padding: 10px 20px;
+}
+
+/* Reduce button padding */
+.btn-primary {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+}
+
+/* Image preview compression */
+#preview {
+    max-width: 80px;
+    max-height: 80px;
+    border-radius: 4px;
+}
+
+/* Responsive Adjustments */
+
+
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 95%;
+    }
+    
+    .modal-body .form-control {
+        font-size: 0.85rem;
+        padding: 5px 8px;
+    }
+
+    .btn-primary {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+}

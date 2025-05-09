@@ -1,0 +1,80 @@
+/* sales.css */
+
+/* General styling */
+
+
+/* Card Styling */
+.card {
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 10px 10px 0 0;
+}
+
+.card-body {
+    color: #fff;
+}
+
+/* Card hover effect */
+.card:hover {
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+}
+
+/* Table Styling */
+.table {
+    color: #fff;
+    border-radius: 8px;
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #1ABC9C;
+}
+
+.table img {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+
+/* Dropdown and icons */
+#chartType {
+    width: 200px;
+    margin-top: 10px;
+}
+
+i.bi-gear {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Best-Sellers Section */
+#bestSellersTable td, #bestSellersTable th {
+    vertical-align: middle;
+}
+
+/* Styling the Chart */
+#salesChart {
+    max-width: 100%;
+    height: 400px;
+    margin: 0 auto;
+}
+
+/* Making the chart responsive */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+}

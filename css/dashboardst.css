@@ -1,0 +1,259 @@
+/* Main container for the entire content, including the title and store cards */
+.stores-container {
+    background-color: #ffffff;  /* White background */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Title Styling */
+.name {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.name h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Main container for the store list */
+#content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Center the content horizontally */
+    padding-top: 20px;  /* Adding padding for better spacing */
+}
+
+/* Styling each store card */
+.store-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 18%;  /* 5 cards per row (100% / 5 = 20%, so we use 18% to account for margin) */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    margin-bottom: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+/* Hover effect for store card */
+.store-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Store image */
+.store-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Store title inside the card */
+.store-card h2 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-top: 15px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+/* Store description text */
+.store-card p {
+    font-size: 1rem;
+    color: #666;
+    margin: 10px 15px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Store button */
+.store-card .btn {
+    background-color: #FF5733; /* Primary Button Color */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.store-card .btn:hover {
+    background-color: #E64A19; /* Hover Color */
+}
+
+/* Button inside the card */
+.store-card .btn {
+    width: 80%;
+    margin: 10px auto;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 1200px) {
+    /* Adjust to 4 cards per row on medium screens */
+    .store-card {
+        max-width: 22%;  /* 4 cards per row (100% / 4 = 25%, but margin needs adjustment) */
+    }
+}
+
+@media (max-width: 992px) {
+    /* Adjust to 3 cards per row on smaller screens */
+    .store-card {
+        max-width: 30%;  /* 3 cards per row */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Adjust to 2 cards per row on very small screens */
+    .store-card {
+        max-width: 45%;  /* 2 cards per row */
+    }
+}
+
+@media (max-width: 480px) {
+    /* Adjust to 1 card per row on mobile screens */
+    .store-card {
+        max-width: 100%;  /* 1 card per row */
+    }
+}
+
+
+/* Main container for the entire content, including the title and supplier cards */
+.suppliers-container {
+    background-color: #ffffff;  /* White background */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Title Styling */
+.name {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.name h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+/* Main container for the supplier list */
+#content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center; /* Center the content horizontally */
+    padding-top: 20px;  /* Adding padding for better spacing */
+}
+
+/* Styling each supplier card */
+.supplier-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 18%;  /* 5 cards per row (100% / 5 = 20%, so we use 18% to account for margin) */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    margin-bottom: 20px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+/* Hover effect for supplier card */
+.supplier-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Supplier image */
+.supplier-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Supplier title inside the card */
+.supplier-card h2 {
+    font-size: 1.6rem;
+    color: #333;
+    margin-top: 15px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+/* Supplier description text */
+.supplier-card p {
+    font-size: 1rem;
+    color: #666;
+    margin: 10px 15px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Supplier button */
+.supplier-card .btn {
+    background-color: #FF5733; /* Primary Button Color */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.supplier-card .btn:hover {
+    background-color: #E64A19; /* Hover Color */
+}
+
+/* Button inside the card */
+.supplier-card .btn {
+    width: 80%;
+    margin: 10px auto;
+}
+
+/* Responsive for smaller screens */
+@media (max-width: 1200px) {
+    /* Adjust to 4 cards per row on medium screens */
+    .supplier-card {
+        max-width: 22%;  /* 4 cards per row (100% / 4 = 25%, but margin needs adjustment) */
+    }
+}
+
+@media (max-width: 992px) {
+    /* Adjust to 3 cards per row on smaller screens */
+    .supplier-card {
+        max-width: 30%;  /* 3 cards per row */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Adjust to 2 cards per row on very small screens */
+    .supplier-card {
+        max-width: 45%;  /* 2 cards per row */
+    }
+}
+
+@media (max-width: 480px) {
+    /* Adjust to 1 card per row on mobile screens */
+    .supplier-card {
+        max-width: 100%;  /* 1 card per row */
+    }
+}
+

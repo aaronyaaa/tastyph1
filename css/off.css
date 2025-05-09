@@ -1,0 +1,80 @@
+/* Positioning the button in the bottom right */
+.circle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: darkviolet;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.circle-btn:hover {
+    background-color: pink;
+}
+
+/* Styling the offcanvas */
+.offcanvas-body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.offcanvas-header {
+    background-color: darkviolet;
+    color: white;
+}
+
+.offcanvas-title {
+    font-weight: bold;
+    color: white;
+}
+
+.close-recipe {
+    font-size: 14px;
+    color: red;
+    cursor: pointer;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+.close-recipe:hover {
+    text-decoration: underline;
+}
+
+/* Styling Recipe List */
+.recipe-item {
+    cursor: pointer;
+    margin: 10px 0;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.recipe-item:hover {
+    background-color: #e0e0e0;
+}
+
+/* Styling Ingredients inside Collapse */
+.collapse ul {
+    padding-left: 20px;
+}
+
+.collapse li {
+    list-style-type: disc;
+    margin: 5px 0;
+}
+
+.collapse h6 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+

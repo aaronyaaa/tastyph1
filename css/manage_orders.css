@@ -1,0 +1,32 @@
+.order-group {
+    background-color: #fff;
+}
+
+.order-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.status-badge {
+    padding: 0.3em 0.7em;
+    font-size: 0.85em;
+}
+
+.status-badge.pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-badge.order-confirmed {
+    background-color: #0d6efd;
+}
+
+.status-badge.packed {
+    background-color: #0dcaf0;
+}
+
+.status-badge.delivered {
+    background-color: #198754;
+    color: #fff;
+}

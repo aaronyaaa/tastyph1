@@ -1,0 +1,124 @@
+/* Navbar - Slim Transparent with Blur */
+.navbar {
+    backdrop-filter: blur(8px); /* Soft blur effect */
+    box-shadow: none;
+    border: none;
+    padding: 10px 20px; /* Ensures proper padding */
+}
+
+/* Navbar Container */
+.container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+}
+
+/* Navbar Brand (Logo + Text) */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 20px; /* Smaller text size */
+    color: white !important; /* Default white text */
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-brand:hover {
+    color: black !important; /* Turns black on hover */
+    border-radius: 25px; /* Makes it rounded */
+
+}
+
+/* Navbar Logo */
+.logo {
+    width: 35px; /* Smaller logo */
+    height: auto;
+}
+
+/* Navbar Items */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Reduced gap */
+}
+
+/* Navbar Links */
+.navbar-nav .nav-link {
+    color: white !important; /* Default white text */
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    padding: 10px 20px; /* Ensures proper padding */
+    font-size: 16px; /* Smaller font */
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: yellow !important;
+    color: black !important; /* Turns black on hover */
+    border-radius: 25px; /* Makes it rounded */
+
+}
+
+/* Navbar Toggler */
+.navbar-toggler {
+    border: none;
+    padding: 2px 6px;
+}
+
+.navbar-toggler-icon {
+    filter: invert(1);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    background-color: darkviolet;
+    border: none;
+}
+
+/* Dropdown Items */
+.dropdown-item {
+    color: white !important; /* Default white text */
+    font-size: 14px;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dropdown-item:hover {
+    background-color: yellow !important;
+    color: black !important; /* Turns black on hover */
+    border-radius: 25px; /* Makes it rounded */
+
+}
+
+/* Profile Picture Styling */
+.navbar-nav img {
+    width: 30px; /* Smaller profile picture */
+    height: 30px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .navbar {
+        height: auto;
+        padding: 5px;
+    }
+
+    .navbar-brand {
+        font-size: 16px;
+    }
+
+    .logo {
+        width: 30px;
+    }
+
+    .navbar-nav {
+        gap: 8px;
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+}

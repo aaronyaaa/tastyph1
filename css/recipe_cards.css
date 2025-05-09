@@ -1,0 +1,15 @@
+/* Clean 2x2 button grid */
+.card-body .button-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.card-body .button-row .btn,
+.card-body .button-row form {
+    flex: 1;
+}
+
+.card-body .button-row form .btn {
+    width: 100%;
+}

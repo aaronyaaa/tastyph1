@@ -1,0 +1,135 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.checkout-container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+/* Header */
+.user-info {
+    margin-bottom: 30px;
+}
+
+.user-info h4 {
+    font-size: 30px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.user-info .dropdown-menu p {
+    font-size: 14px;
+    margin: 5px 0;
+    color: #777;
+}
+
+.user-info .dropdown-menu p strong {
+    font-weight: bold;
+}
+
+/* Cart Table */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table th,
+.table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+.table td {
+    font-size: 14px;
+}
+
+.table td input {
+    width: 60px;
+    padding: 5px;
+    text-align: center;
+}
+
+.total-price {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Total and Payment Section */
+.total-section {
+    text-align: right;
+    font-size: 18px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.payment-method {
+    margin-top: 20px;
+}
+
+.payment-method select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+.payment-fields {
+    margin-top: 20px;
+}
+
+.payment-fields input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+
+#file-preview {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.8;
+}
