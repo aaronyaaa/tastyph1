@@ -122,3 +122,8 @@
         padding: 5px 8px;
     }
 }
+
+.navbar-nav, .navbar-nav .nav-item {
+    list-style: none !important;
+    padding-left: 0 !important;
+}

@@ -50,6 +50,7 @@ $resultSuppliers = $conn->query($sqlSuppliers);
                 <div class="carousel-item">
                     <img src="../uploads/3.png" class="d-block carousel-img" alt="Kakanin Delights">
                 </div>
+
             </div>
             <button class="carousel-control-prev" type="button" data-bs-target="#imageCarousel" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon"></span>
@@ -132,4 +133,3 @@ $resultSuppliers = $conn->query($sqlSuppliers);
 </body>
 
 </html>
-

@@ -86,15 +86,14 @@ $stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Store Dashboard</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/store.css">
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/modal.css">
     <link rel="stylesheet" href="../css/recipe_cards.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -107,258 +106,460 @@ $stmt->close();
     <?php include("../includes/nav_" . strtolower($userType) . ".php"); ?>
     <?php include("../includes/modal.php"); ?>
 
-    <!-- Profile Section -->
-    <div id="content" class="mt-4 ">
-        <?php
-        // Check if the user is logged in and is a seller
-        if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset($_SESSION['userId'])):
-            // Get the current user ID from the session
-            $userId = $_SESSION['userId'];  // Use 'userId' as per your session dump
-            include("../database/config.php");
+<?php
+// Initialize user data
+$userData = null;
+if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset($_SESSION['userId'])) {
+    $userId = $_SESSION['userId'];
+    include("../database/config.php");
 
-
-            $sql = "SELECT u.*, a.business_name 
+    $sql = "SELECT u.*, a.business_name 
             FROM users u
             LEFT JOIN apply_seller a ON u.id = a.seller_id 
             WHERE u.id = ?";
 
-            if ($stmt = $conn->prepare($sql)) {
-                $stmt->bind_param("i", $userId);  // Bind the userId to the query
-                $stmt->execute();
-                $result = $stmt->get_result();
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result && $result->num_rows > 0) {
+            $userData = $result->fetch_assoc();
+        }
+    }
+}
+?>
 
-                if ($result && $result->num_rows > 0):
-                    $row = $result->fetch_assoc();
-        ?>
-                    <div class="profile-container">
-                        <img src="<?php echo htmlspecialchars($row['profile_pics']); ?>" alt="Profile Picture" class="rounded-circle" style="width: 100px; height: 100px;">
-                        <div class="profile-info">
-                            <h1><?php echo htmlspecialchars($row['business_name']); ?></h1>
-                            <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?></p>
-                            <p><strong>Address:</strong> <?php echo htmlspecialchars($row['streetname'] . ', ' . $row['barangay'] . ', ' . $row['city'] . ', ' . $row['province'] . ', ' . $row['country']); ?></p>
-                            <p><strong>Email:</strong> <?php echo htmlspecialchars($row['email']); ?></p>
-                        </div>
-                        <a href="#" class="btn btn-primary edit-profile-btn" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</a>
-                        <a href="#" class="btn btn-secondary mt-2" data-bs-toggle="modal" data-bs-target="#businessHoursModal">
-                            Manage Business Hours
-                        </a>
-
-                    </div>
-                <?php else: ?>
-                    <p class="text-center">No profile found for this user.</p>
-            <?php endif;
-            } else {
-                echo "<p class='text-center'>Error fetching user data.</p>";
-            }
-            $conn->close();
-        else: ?>
-            <p class="text-center">Access denied. You are not authorized to view this page.</p>
-        <?php endif; ?>
-    </div>
-
-
-    <div class="container mt-5">
-        <h1 class="text-center">Product Inventory</h1>
-        <!-- Category Button -->
-        <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">Add Category</button>
-        <!-- Button to trigger modal -->
-        <a href="../includes/cook_turon.php" class="btn btn-primary my-3">
-            View Ingredients Inventory
-        </a>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecipeModal">
-            + Add Recipe
-        </button>
-        <!-- Example View Button for each recipe -->
-
-        <table class="table table-bordered text-center" id="productTable">
-            <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Category ID</th>
-                    <th>Image</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                // Check if user is logged in and is a seller
-                if (isset($_SESSION['userId']) && isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller') {
-                    $userId = $_SESSION['userId']; // Get the user ID from the session
-
-                    // Database connection
-                    include("../database/config.php");
-
-                    // Query to get products for the logged-in user (seller)
-                    $sql = "SELECT * FROM products WHERE seller_id = ?"; // Assuming 'seller_id' relates products to sellers
-                    if ($stmt = $conn->prepare($sql)) {
-                        $stmt->bind_param("i", $userId); // Bind the logged-in user's ID
-                        $stmt->execute();
-                        $result = $stmt->get_result();
-
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<tr>
-                                <td>{$row['Product_name']}</td>
-                                <td>{$row['description']}</td>
-                                <td>{$row['price']}</td>
-                                <td>{$row['quantity']}</td>
-                                <td>{$row['category_id']}</td>
-                                <td><img src='{$row['image_url']}' alt='Product Image' width='50'></td>
-                                <td id='action-{$row['product_id']}'>
-                                    <!-- Edit button -->
-                                    <button class='btn btn-warning btn-sm edit-product' 
-                                        data-bs-toggle='modal' 
-                                        data-bs-target='#editProductModal'
-                                        data-id='{$row['product_id']}'
-                                        data-name='" . htmlspecialchars($row["Product_name"]) . "'
-                                        data-description='" . htmlspecialchars($row["description"]) . "'
-                                        data-price='{$row["price"]}'
-                                        data-quantity='{$row["quantity"]}'
-                                        data-category='{$row["category_id"]}'
-                                        data-image='{$row["image_url"]}'>Edit</button>
-
-                                    <!-- Delete button -->
-                                    <button class='btn btn-danger btn-sm delete-product' data-id='{$row['product_id']}'>Delete</button>
-                                </td>
-                            </tr>";
-                            }
+    <div class="store-container">
+        <!-- Store Header -->
+        <div class="store-header">
+            <div class="row align-items-center">
+                <div class="col-md-2">
+                    <img src="<?php echo !empty($userData['profile_pics']) ? htmlspecialchars($userData['profile_pics']) : '../images/default-profile.jpg'; ?>" 
+                         alt="Store Logo" 
+                         class="rounded-circle" 
+                         style="width: 120px; height: 120px; object-fit: cover; border: 3px solid white;">
+                </div>
+                <div class="col-md-10">
+                    <h1><?php echo !empty($userData['business_name']) ? htmlspecialchars($userData['business_name']) : 'My Store'; ?></h1>
+                    <p class="mb-2">
+                        <i class="fas fa-map-marker-alt"></i> 
+                        <?php 
+                        if (!empty($userData)) {
+                            echo htmlspecialchars(
+                                implode(', ', array_filter([
+                                    $userData['streetname'] ?? '',
+                                    $userData['barangay'] ?? '',
+                                    $userData['city'] ?? ''
+                                ]))
+                            );
                         } else {
-                            echo "<tr><td colspan='9'>No Products Found</td></tr>";
+                            echo 'Address not set';
                         }
-                        $stmt->close();
-                    } else {
-                        echo "<tr><td colspan='9'>Error retrieving products.</td></tr>";
-                    }
+                        ?>
+                    </p>
+                    <p class="mb-2">
+                        <i class="fas fa-envelope"></i> 
+                        <?php echo !empty($userData['email']) ? htmlspecialchars($userData['email']) : 'Email not set'; ?>
+                    </p>
+                    <div class="store-stats">
+                        <div class="stat-card">
+                            <h3><?php echo isset($result) ? $result->num_rows : 0; ?></h3>
+                            <p>Products</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3><?php echo isset($recipes) ? count($recipes) : 0; ?></h3>
+                            <p>Recipes</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>4.8</h3>
+                            <p>Rating</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    $conn->close();
-                } else {
-                    echo "<tr><td colspan='9'>Access denied. You are not authorized to view these products.</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
+        <div class="store-content">
+            <!-- Sidebar -->
+            <div class="store-sidebar">
+                <div class="quick-actions">
+                    <h4>Quick Actions</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRecipeModal">
+                        <i class="fas fa-utensils"></i> Add Recipe
+                    </button>
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#businessHoursModal">
+                        <i class="fas fa-clock"></i> Business Hours
+                    </button>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                </div>
 
-
-        <div class="container mt-5">
-            <h2 class="text-center">My Recipes</h2>
-            <div class="row">
-                <?php foreach ($recipes as $row): ?>
-                    <div class="col-md-4 mb-4">
-                        <div class="card h-100">
-                            <?php if (!empty($row['recipe_image'])): ?>
-                                <img src="<?php echo htmlspecialchars($row['recipe_image']); ?>" class="card-img-top" alt="Recipe Image">
-                            <?php endif; ?>
-                            <div class="card-body">
-                                <h5 class="card-title"><?php echo htmlspecialchars($row['title']); ?></h5>
-                                <p><strong>Prep:</strong> <?php echo htmlspecialchars($row['prep_time']); ?> | <strong>Cook:</strong> <?php echo htmlspecialchars($row['cook_time']); ?></p>
-                                <p><strong>Servings:</strong> <?php echo htmlspecialchars($row['servings']); ?></p>
-
-                                <!-- Row 1: View Buttons -->
-                                <div class="button-row d-flex gap-2 mb-2">
-                                    <button type="button" class="btn btn-info btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#viewRecipeModal<?php echo $row['recipe_id']; ?>">
-                                        View Recipe
-                                    </button>
-
+                <div class="store-hours">
+                    <h4 class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-clock me-2"></i>
+                        Business Hours
+                    </h4>
+                    <div class="business-hours-grid">
+                        <?php 
+                        $days = [
+                            'sunday' => ['icon' => 'fas fa-sun'],
+                            'monday' => ['icon' => 'fas fa-moon'],
+                            'tuesday' => ['icon' => 'fas fa-moon'],
+                            'wednesday' => ['icon' => 'fas fa-moon'],
+                            'thursday' => ['icon' => 'fas fa-moon'],
+                            'friday' => ['icon' => 'fas fa-moon'],
+                            'saturday' => ['icon' => 'fas fa-sun']
+                        ];
+                        
+                        foreach ($days as $day => $info): 
+                            $hours = $business_hours[$day] ?? null;
+                            $isOpen = $hours && $hours['is_available'];
+                            $openTime = $isOpen ? date('h:i A', strtotime($hours['open_time'])) : null;
+                            $closeTime = $isOpen ? date('h:i A', strtotime($hours['close_time'])) : null;
+                        ?>
+                            <div class="hours-card <?php echo $isOpen ? 'open' : 'closed'; ?>">
+                                <div class="day-name">
+                                    <i class="<?php echo $info['icon']; ?>"></i>
+                                    <?php echo ucfirst($day); ?>
                                 </div>
+                                <div class="hours-time">
+                                    <?php if ($isOpen): ?>
+                                        <div class="d-flex flex-column">
+                                            <span><?php echo $openTime . ' - ' . $closeTime; ?></span>
+                                            <span class="hours-status status-open mt-1">Open</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="d-flex flex-column">
+                                            <span>Closed</span>
+                                            <span class="hours-status status-closed mt-1">Closed</span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
 
-                                <!-- Row 2: Edit + Delete -->
-                                <div class="button-row d-flex gap-2">
-                                    <button type="button" class="btn btn-warning btn-sm flex-fill" data-bs-toggle="modal" data-bs-target="#editRecipeModal<?php echo $row['recipe_id']; ?>">
-                                        Edit
+            <!-- Main Content -->
+            <div class="store-main">
+                <!-- Products Section -->
+                <div class="section-title">
+                    <h2>Products</h2>
+                    <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                </div>
+                <div class="product-grid">
+                    <?php
+                    if (isset($_SESSION['userId']) && isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller') {
+                        $userId = $_SESSION['userId'];
+                        include("../database/config.php");
+                        $sql = "SELECT * FROM products WHERE seller_id = ?";
+                        if ($stmt = $conn->prepare($sql)) {
+                            $stmt->bind_param("i", $userId);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+
+                            while ($row = $result->fetch_assoc()):
+                    ?>
+                        <div class="product-card">
+                            <img src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="<?php echo htmlspecialchars($row['Product_name']); ?>" class="product-image">
+                            <div class="product-info">
+                                <h5><?php echo htmlspecialchars($row['Product_name']); ?></h5>
+                                <p class="text-muted"><?php echo htmlspecialchars(substr($row['description'], 0, 100)) . '...'; ?></p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0">₱<?php echo number_format($row['price'], 2); ?></span>
+                                    <span class="badge bg-<?php echo $row['quantity'] > 0 ? 'success' : 'danger'; ?>">
+                                        <?php echo $row['quantity']; ?> in stock
+                                    </span>
+                                </div>
+                                <div class="mt-3 d-flex gap-2">
+                                    <button class="btn btn-warning btn-sm flex-grow-1 edit-product" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editProductModal"
+                                        data-id="<?php echo $row['product_id']; ?>"
+                                        data-name="<?php echo htmlspecialchars($row['Product_name']); ?>"
+                                        data-description="<?php echo htmlspecialchars($row['description']); ?>"
+                                        data-price="<?php echo $row['price']; ?>"
+                                        data-quantity="<?php echo $row['quantity']; ?>"
+                                        data-category="<?php echo $row['category_id']; ?>"
+                                        data-image="<?php echo $row['image_url']; ?>">
+                                        <i class="fas fa-edit"></i> Edit
                                     </button>
+                                    <button class="btn btn-danger btn-sm delete-product" data-id="<?php echo $row['product_id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php 
+                            endwhile;
+                        }
+                    }
+                    ?>
+                </div>
 
-                                    <form method="POST" action="../helpers/delete_recipe.php" onsubmit="return confirm('Are you sure you want to delete this recipe?');" class="flex-fill">
-                                        <input type="hidden" name="recipe_id" value="<?php echo $row['recipe_id']; ?>">
-                                        <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
+                <!-- Recipes Section -->
+                <div class="section-title mt-5">
+                    <h2>Recipes</h2>
+                    <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addRecipeModal">
+                        <i class="fas fa-plus"></i> Add Recipe
+                    </button>
+                </div>
+                <div class="product-grid">
+                    <?php foreach ($recipes as $recipe): ?>
+                        <div class="product-card">
+                            <?php if (!empty($recipe['recipe_image'])): ?>
+                                <img src="<?php echo htmlspecialchars($recipe['recipe_image']); ?>" class="product-image" alt="<?php echo htmlspecialchars($recipe['title']); ?>">
+                            <?php endif; ?>
+                            <div class="product-info">
+                                <h5><?php echo htmlspecialchars($recipe['title']); ?></h5>
+                                <p class="text-muted">
+                                    <i class="fas fa-clock"></i> Prep: <?php echo htmlspecialchars($recipe['prep_time']); ?> | 
+                                    Cook: <?php echo htmlspecialchars($recipe['cook_time']); ?>
+                                </p>
+                                <p class="text-muted">
+                                    <i class="fas fa-users"></i> Serves: <?php echo htmlspecialchars($recipe['servings']); ?>
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <button class="btn btn-info btn-sm flex-grow-1" data-bs-toggle="modal" data-bs-target="#viewRecipeModal<?php echo $recipe['recipe_id']; ?>">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editRecipeModal<?php echo $recipe['recipe_id']; ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="POST" action="../helpers/delete_recipe.php" onsubmit="return confirm('Are you sure you want to delete this recipe?');" class="d-inline">
+                                        <input type="hidden" name="recipe_id" value="<?php echo $recipe['recipe_id']; ?>">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </form>
                                 </div>
                             </div>
                         </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Modals -->
+    <?php foreach ($recipes as $recipe): ?>
+        <!-- View Recipe Modal -->
+        <div class="modal fade" id="viewRecipeModal<?php echo $recipe['recipe_id']; ?>" tabindex="-1" aria-labelledby="viewRecipeModalLabel<?php echo $recipe['recipe_id']; ?>" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewRecipeModalLabel<?php echo $recipe['recipe_id']; ?>">
+                            <?php echo htmlspecialchars($recipe['title']); ?>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
-                    <!-- View Recipe Modal with Tabs -->
-                    <div class="modal fade" id="viewRecipeModal<?php echo $row['recipe_id']; ?>" tabindex="-1" aria-labelledby="viewRecipeModalLabel<?php echo $row['recipe_id']; ?>" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="viewRecipeModalLabel<?php echo $row['recipe_id']; ?>">
-                                        <?php echo htmlspecialchars($row['title']); ?>
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <ul class="nav nav-tabs" id="recipeTab<?php echo $row['recipe_id']; ?>" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <a class="nav-link active" id="ingredients-tab<?php echo $row['recipe_id']; ?>" data-bs-toggle="tab" href="#ingredients<?php echo $row['recipe_id']; ?>" role="tab" aria-controls="ingredients" aria-selected="true">Ingredients</a>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <a class="nav-link" id="directions-tab<?php echo $row['recipe_id']; ?>" data-bs-toggle="tab" href="#directions<?php echo $row['recipe_id']; ?>" role="tab" aria-controls="directions" aria-selected="false">Directions</a>
-                                        </li>
-                                        <?php if (!empty($row['notes'])): ?>
-                                            <li class="nav-item" role="presentation">
-                                                <a class="nav-link" id="notes-tab<?php echo $row['recipe_id']; ?>" data-bs-toggle="tab" href="#notes<?php echo $row['recipe_id']; ?>" role="tab" aria-controls="notes" aria-selected="false">Notes</a>
-                                            </li>
-                                        <?php endif; ?>
-                                    </ul>
-                                    <div class="tab-content" id="recipeTabContent<?php echo $row['recipe_id']; ?>">
-                                        <div class="tab-pane fade show active" id="ingredients<?php echo $row['recipe_id']; ?>" role="tabpanel" aria-labelledby="ingredients-tab<?php echo $row['recipe_id']; ?>">
-                                            <ul>
-                                                <?php
-                                                // Assume $row['ingredients'] contains the ingredients string
-                                                $ingredients = explode("\n", $row['ingredients']); // Split ingredients by newline
+                    <div class="modal-body">
+                        <?php if (!empty($recipe['recipe_image'])): ?>
+                            <img src="<?php echo htmlspecialchars($recipe['recipe_image']); ?>" 
+                                 alt="Recipe Image" 
+                                 class="img-fluid rounded mb-3" 
+                                 style="max-height: 300px; width: 100%; object-fit: cover;">
+                        <?php endif; ?>
 
-                                                foreach ($ingredients as $ingredient):
-                                                    $ingredient = trim($ingredient); // Trim spaces for cleaner links
-                                                    if (!empty($ingredient)): // Avoid empty ingredients (e.g., extra newlines)
-                                                ?>
-                                                        <li>
-                                                            <!-- Use JavaScript to handle the click event -->
-                                                            <a href="javascript:void(0);" class="ingredient-link" data-ingredient="<?php echo urlencode($ingredient); ?>">
-                                                                <?php echo htmlspecialchars($ingredient); ?>
-                                                            </a>
-                                                        </li>
-                                                    <?php endif; ?>
-                                                <?php endforeach; ?>
-                                            </ul>
-
-                                        </div>
-                                        <div class="tab-pane fade" id="directions<?php echo $row['recipe_id']; ?>" role="tabpanel" aria-labelledby="directions-tab<?php echo $row['recipe_id']; ?>">
-                                            <p><?php echo nl2br(htmlspecialchars($row['directions'])); ?></p>
-                                        </div>
-                                        <?php if (!empty($row['notes'])): ?>
-                                            <div class="tab-pane fade" id="notes<?php echo $row['recipe_id']; ?>" role="tabpanel" aria-labelledby="notes-tab<?php echo $row['recipe_id']; ?>">
-                                                <p><?php echo nl2br(htmlspecialchars($row['notes'])); ?></p>
-                                            </div>
-                                        <?php endif; ?>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-users mb-2"></i>
+                                        <h6 class="card-title">Servings</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['servings']) ?: 'N/A'; ?></p>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock mb-2"></i>
+                                        <h6 class="card-title">Prep Time</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['prep_time']) ?: 'N/A'; ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-fire mb-2"></i>
+                                        <h6 class="card-title">Cook Time</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['cook_time']) ?: 'N/A'; ?></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-list-ul me-2"></i>Ingredients</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
+                                            <?php
+                                            $ingredients = explode(',', $recipe['ingredients']);
+                                            foreach ($ingredients as $ingredient):
+                                                $ingredient = trim($ingredient);
+                                                if (!empty($ingredient)):
+                                            ?>
+                                                <li class="list-group-item">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <?php echo htmlspecialchars($ingredient); ?>
+                                                </li>
+                                            <?php 
+                                                endif;
+                                            endforeach; 
+                                            ?>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-utensils me-2"></i>Directions</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text"><?php echo nl2br(htmlspecialchars($recipe['directions'])); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($recipe['notes'])): ?>
+                            <div class="card mt-3">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Notes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><?php echo nl2br(htmlspecialchars($recipe['notes'])); ?></p>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
 
-                <?php endforeach; ?>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-    </div>
+        <!-- Edit Recipe Modal -->
+        <div class="modal fade" id="editRecipeModal<?php echo $recipe['recipe_id']; ?>" tabindex="-1" aria-labelledby="editRecipeModalLabel<?php echo $recipe['recipe_id']; ?>" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <form method="POST" action="../helpers/edit_recipe.php" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title" id="editRecipeModalLabel<?php echo $recipe['recipe_id']; ?>">
+                                <i class="fas fa-edit me-2"></i>Edit Recipe: <?php echo htmlspecialchars($recipe['title']); ?>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
 
+                        <div class="modal-body">
+                            <input type="hidden" name="recipe_id" value="<?php echo $recipe['recipe_id']; ?>">
 
-    <!-- Ensure jQuery is loaded before Bootstrap -->
+                            <div class="mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($recipe['title']); ?>" required>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Servings</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                        <input type="text" name="servings" class="form-control" value="<?php echo htmlspecialchars($recipe['servings']); ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Prep Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                        <input type="text" name="prep_time" class="form-control" value="<?php echo htmlspecialchars($recipe['prep_time']); ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Cook Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-fire"></i></span>
+                                        <input type="text" name="cook_time" class="form-control" value="<?php echo htmlspecialchars($recipe['cook_time']); ?>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ingredients (comma-separated)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-list-ul"></i></span>
+                                    <textarea name="ingredients" class="form-control" rows="3" required><?php echo htmlspecialchars($recipe['ingredients']); ?></textarea>
+                                </div>
+                                <small class="text-muted">Separate ingredients with commas</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Directions</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-utensils"></i></span>
+                                    <textarea name="directions" class="form-control" rows="5" required><?php echo htmlspecialchars($recipe['directions']); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Notes</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
+                                    <textarea name="notes" class="form-control" rows="3"><?php echo htmlspecialchars($recipe['notes']); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Change Image (optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                    <input type="file" name="recipe_image" class="form-control" accept="image/*">
+                                </div>
+                                <?php if (!empty($recipe['recipe_image'])): ?>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Current image:</small>
+                                        <img src="<?php echo htmlspecialchars($recipe['recipe_image']); ?>" 
+                                             alt="Current Recipe Image" 
+                                             class="img-thumbnail mt-1" 
+                                             style="max-height: 100px;">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/manage_product.js"></script>
 
-
 </body>
-
-
 
 </html>

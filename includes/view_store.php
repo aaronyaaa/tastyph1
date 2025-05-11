@@ -78,6 +78,9 @@ $userType = $_SESSION['usertype'] ?? 'user';
                     <button type="button" class="store-info-btn" data-bs-toggle="modal" data-bs-target="#shopInfoModal">
                         Shop Info
                     </button>
+                    <a href="chat.php?seller_id=<?= $seller_id ?>" class="btn btn-outline-primary message-btn">
+                        <i class="fas fa-envelope"></i> Message Seller
+                    </a>
                 </div>
             </div>
         </div>
@@ -108,6 +111,7 @@ $userType = $_SESSION['usertype'] ?? 'user';
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../js/view_store.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
