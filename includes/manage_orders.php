@@ -30,6 +30,22 @@ if (!$supplierId) {
 
 // Handle status filter
 $statusFilter = $_GET['status'] ?? '';
+$dateRange = $_GET['date_range'] ?? '';
+$dateCondition = '';
+$params = [$supplierId, $supplierId];
+$types = 'ii';
+
+if ($dateRange) {
+    if ($dateRange == 'today') {
+        $dateCondition = " AND DATE(o.order_date) = CURDATE()";
+    } elseif ($dateRange == 'last_week') {
+        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+    } elseif ($dateRange == 'last_month') {
+        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
+    } elseif ($dateRange == 'last_year') {
+        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)";
+    }
+}
 
 // Prepare query based on filter
 $sql = "
@@ -49,12 +65,14 @@ $sql = "
     LEFT JOIN apply_seller s ON p.seller_id = s.seller_id
     LEFT JOIN apply_supplier sup ON i.supplier_id = sup.supplier_id
     LEFT JOIN users u ON o.user_id = u.id
-    WHERE (i.supplier_id = ? OR v.ingredient_id IN (SELECT ingredient_id FROM ingredients WHERE supplier_id = ?))
-";
+    WHERE (i.supplier_id = ? OR v.ingredient_id IN (SELECT ingredient_id FROM ingredients WHERE supplier_id = ?))";
 
 if ($statusFilter) {
-    $sql .= " AND o.status = ?";  // Optional filter by status
+    $sql .= " AND o.status = ?";
+    $params[] = $statusFilter;
+    $types .= 's';
 }
+$sql .= $dateCondition;
 
 // Prepare SQL statement
 $stmt = $conn->prepare($sql);
@@ -62,24 +80,28 @@ if (!$stmt) {
     die("SQL Error: " . $conn->error);
 }
 
-// Check if statusFilter exists and bind parameters accordingly
-if ($statusFilter) {
-    // Bind three parameters: two integers for supplierId, one string for statusFilter
-    $stmt->bind_param("iis", $supplierId, $supplierId, $statusFilter);
-} else {
-    // Bind only two integers for supplierId
-    $stmt->bind_param("ii", $supplierId, $supplierId);
-}
+$stmt->bind_param($types, ...$params);
 
 $stmt->execute();
 $result = $stmt->get_result();
 
 
-// Group orders by store and buyer
+// Group orders by order_id and buyer
 $orders = [];
 while ($row = $result->fetch_assoc()) {
+    $orderId = $row['order_id'];
     $buyerName = $row['first_name'] . ' ' . $row['last_name'];
-    $orders[$buyerName][] = $row;
+    if (!isset($orders[$orderId])) {
+        $orders[$orderId] = [
+            'buyer' => $buyerName,
+            'status' => $row['order_status'],
+            'order_date' => $row['order_date'],
+            'items' => [],
+            'total_amount' => 0
+        ];
+    }
+    $orders[$orderId]['items'][] = $row;
+    $orders[$orderId]['total_amount'] += $row['item_price'];
 }
 
 // Handle status update submission
@@ -134,6 +156,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_PO
                 </option>
             <?php endforeach; ?>
         </select>
+        <select class="form-select me-2" name="date_range">
+            <option value="">All Dates</option>
+            <option value="today" <?= (isset($_GET['date_range']) && $_GET['date_range'] == 'today') ? 'selected' : '' ?>>Today</option>
+            <option value="last_week" <?= (isset($_GET['date_range']) && $_GET['date_range'] == 'last_week') ? 'selected' : '' ?>>Last Week</option>
+            <option value="last_month" <?= (isset($_GET['date_range']) && $_GET['date_range'] == 'last_month') ? 'selected' : '' ?>>Last Month</option>
+            <option value="last_year" <?= (isset($_GET['date_range']) && $_GET['date_range'] == 'last_year') ? 'selected' : '' ?>>Last Year</option>
+        </select>
         <button type="submit" class="btn btn-primary">Filter</button>
     </form>
 
@@ -145,64 +174,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_PO
         <div class="alert alert-info mt-3">No orders found for selected status.</div>
     <?php endif; ?>
 
-    <?php foreach ($orders as $buyer => $items): ?>
-        <div class="order-group p-3 mb-4 border rounded shadow-sm">
-            <h5 class="mb-3">Buyer: <?= htmlspecialchars($buyer) ?></h5>
-
-            <?php foreach ($items as $order): ?>
-                <div class="d-flex border-top py-3">
-                    <!-- Display appropriate image: product, ingredient, or variant -->
-                    <?php if ($order['product_image']): ?>
-                        <img src="../uploads/<?= htmlspecialchars($order['product_image']); ?>" class="img-thumbnail me-3 order-img" style="width: 50px; height: 50px;">
-                    <?php elseif ($order['ingredient_image']): ?>
-                        <img src="../uploads/<?= htmlspecialchars($order['ingredient_image']); ?>" class="img-thumbnail me-3 order-img" style="width: 50px; height: 50px;">
-                    <?php elseif ($order['variant_image']): ?>
-                        <img src="../uploads/<?= htmlspecialchars($order['variant_image']); ?>" class="img-thumbnail me-3 order-img" style="width: 50px; height: 50px;">
-                    <?php else: ?>
-                        <img src="../uploads/default_image.png" class="img-thumbnail me-3 order-img" style="width: 50px; height: 50px;">
-                    <?php endif; ?>
-
-                    <div class="flex-grow-1">
-                        <h6>
-                            <?= htmlspecialchars($order['product_name']); ?> 
-                            <?= $order['variant_name'] ? " - " . htmlspecialchars($order['variant_name']) : "" ?>
-                        </h6>
-                        <p class="mb-1">Quantity: <?= htmlspecialchars($order['quantity']); ?></p>
-                        <p class="mb-1">₱<?= number_format($order['item_price'], 2); ?></p>
-                        <p class="mb-1">Order Date: <?= date('M d, Y h:i A', strtotime($order['order_date'])); ?></p>
-
-                        <!-- Status Badge Display (Including Cancelled) -->
-                        <span class="badge 
-                            <?php 
-                                if ($order['order_status'] === 'Pending') echo 'bg-warning';
-                                elseif ($order['order_status'] === 'Order Confirmed') echo 'bg-primary';
-                                elseif ($order['order_status'] === 'Packed') echo 'bg-info';
-                                elseif ($order['order_status'] === 'Delivered') echo 'bg-success';
-                                elseif ($order['order_status'] === 'Cancelled') echo 'bg-danger';
-                                else echo 'bg-secondary';
-                            ?>">
-                            <?= htmlspecialchars($order['order_status']); ?>
-                        </span>
-
-                        <!-- Status Update Form -->
-                        <?php if (!in_array($order['order_status'], ['Delivered', 'Cancelled'])): ?>
-                            <form method="post" class="d-flex align-items-center mt-2">
-                                <input type="hidden" name="order_id" value="<?= $order['order_id'] ?>">
-                                <select class="form-select me-2" name="update_status">
-                                    <?php foreach (['Pending', 'Order Confirmed', 'Packed', 'Delivered', 'Cancelled'] as $status): ?>
-                                        <option value="<?= $status ?>" <?= $order['order_status'] == $status ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($status) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <button class="btn btn-primary" type="submit">Update</button>
-                            </form>
-                        <?php else: ?>
-                            <span class="badge bg-secondary mt-2">No further changes allowed.</span>
-                        <?php endif; ?>
-                    </div>
+    <?php foreach ($orders as $orderId => $orderData): ?>
+        <div class="order-group p-4 mb-4 border rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-1">Order #<?= $orderId ?></h5>
+                    <p class="mb-1">Buyer: <?= htmlspecialchars($orderData['buyer']) ?></p>
+                    <p class="mb-1">Order Date: <?= date('M d, Y h:i A', strtotime($orderData['order_date'])) ?></p>
+                    <p class="mb-1">Total Amount: ₱<?= number_format($orderData['total_amount'], 2) ?></p>
                 </div>
-            <?php endforeach; ?>
+                <div class="text-end">
+                    <!-- Status Badge -->
+                    <span class="badge 
+                        <?php 
+                            if ($orderData['status'] === 'Pending') echo 'bg-warning';
+                            elseif ($orderData['status'] === 'Order Confirmed') echo 'bg-primary';
+                            elseif ($orderData['status'] === 'Packed') echo 'bg-info';
+                            elseif ($orderData['status'] === 'Delivered') echo 'bg-success';
+                            elseif ($orderData['status'] === 'Cancelled') echo 'bg-danger';
+                            else echo 'bg-secondary';
+                        ?> fs-6 mb-2">
+                        <?= htmlspecialchars($orderData['status']) ?>
+                    </span>
+
+                    <!-- Bulk Status Update Form -->
+                    <?php if (!in_array($orderData['status'], ['Delivered', 'Cancelled'])): ?>
+                        <form method="post" class="d-flex align-items-center justify-content-end">
+                            <input type="hidden" name="order_id" value="<?= $orderId ?>">
+                            <select class="form-select me-2" name="update_status" style="width: auto;">
+                                <?php foreach (['Pending', 'Order Confirmed', 'Packed', 'Delivered', 'Cancelled'] as $status): ?>
+                                    <option value="<?= $status ?>" <?= $orderData['status'] == $status ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($status) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button class="btn btn-primary" type="submit">Update Order Status</button>
+                        </form>
+                    <?php else: ?>
+                        <div class="text-muted">No further changes allowed</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($orderData['items'] as $item): ?>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <?php if ($item['product_image']): ?>
+                                            <img src="../uploads/<?= htmlspecialchars($item['product_image']); ?>" class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                        <?php elseif ($item['ingredient_image']): ?>
+                                            <img src="../uploads/<?= htmlspecialchars($item['ingredient_image']); ?>" class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                        <?php elseif ($item['variant_image']): ?>
+                                            <img src="../uploads/<?= htmlspecialchars($item['variant_image']); ?>" class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                        <?php else: ?>
+                                            <img src="../uploads/default_image.png" class="img-thumbnail me-2" style="width: 40px; height: 40px;">
+                                        <?php endif; ?>
+                                        <div>
+                                            <?= htmlspecialchars($item['product_name'] ?? $item['ingredient_name']); ?>
+                                            <?= $item['variant_name'] ? "<br><small class='text-muted'>" . htmlspecialchars($item['variant_name']) . "</small>" : "" ?>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><?= htmlspecialchars($item['quantity']); ?></td>
+                                <td>₱<?= number_format($item['item_price'], 2); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     <?php endforeach; ?>
 

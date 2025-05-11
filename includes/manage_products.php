@@ -2,7 +2,7 @@
 include("../database/session.php"); // Ensure user is authenticated and session is active
 include("../database/config.php");
 // Fetch user details from session
-$userId = $_SESSION['id'] ?? ''; // Assuming 'id' is set in session
+$userId = $_SESSION['userId'] ?? ''; // Changed from $_SESSION['id'] to $_SESSION['userId']
 $userType = $_SESSION['usertype'] ?? '';
 // Redirect if user is not a seller
 if ($userType !== 'seller') {
@@ -19,6 +19,20 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userId); // Use userId (seller's id)
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Add new query to count products with stock
+$stockCountSql = "SELECT COUNT(*) as available_products FROM products WHERE seller_id = ? AND quantity > 0";
+$stockCountStmt = $conn->prepare($stockCountSql);
+$stockCountStmt->bind_param("i", $userId);
+$stockCountStmt->execute();
+$stockCountResult = $stockCountStmt->get_result();
+$availableProducts = $stockCountResult->fetch_assoc()['available_products'];
+$stockCountStmt->close();
+
+// Debug output
+error_log("User ID: " . $userId);
+error_log("Available Products: " . $availableProducts);
+
 // Fetch categories for the dropdown in the form
 $categoriesQuery = "SELECT category_id, name FROM categories";
 $categoriesResult = $conn->query($categoriesQuery);
@@ -163,8 +177,8 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
                     </p>
                     <div class="store-stats">
                         <div class="stat-card">
-                            <h3><?php echo isset($result) ? $result->num_rows : 0; ?></h3>
-                            <p>Products</p>
+                            <h3><?php echo $availableProducts; ?></h3>
+                            <p>Available Products</p>
                         </div>
                         <div class="stat-card">
                             <h3><?php echo isset($recipes) ? count($recipes) : 0; ?></h3>
@@ -195,6 +209,9 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
                     </button>
                     <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                         <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                        <i class="fas fa-tags"></i> Add Category
                     </button>
                 </div>
 
@@ -555,10 +572,189 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
         </div>
     <?php endforeach; ?>
 
+    <!-- Add Category Modal -->
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCategoryModalLabel">
+                        <i class="fas fa-tags me-2"></i>Add New Category
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="../helpers/add_category.php" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" name="category_name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Category
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category List Modal -->
+    <div class="modal fade" id="categoryListModal" tabindex="-1" aria-labelledby="categoryListModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryListModalLabel">
+                        <i class="fas fa-list me-2"></i>Categories
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <?php
+                        $categoriesQuery = "SELECT category_id, name FROM categories ORDER BY name";
+                        $categoriesResult = $conn->query($categoriesQuery);
+                        if ($categoriesResult && $categoriesResult->num_rows > 0) {
+                            while ($category = $categoriesResult->fetch_assoc()) {
+                                echo '<div class="list-group-item d-flex justify-content-between align-items-center">';
+                                echo '<span>' . htmlspecialchars($category['name']) . '</span>';
+                                echo '<div class="btn-group">';
+                                echo '<button type="button" class="btn btn-sm btn-warning edit-category" 
+                                        data-id="' . $category['category_id'] . '" 
+                                        data-name="' . htmlspecialchars($category['name']) . '">
+                                        <i class="fas fa-edit"></i>
+                                    </button>';
+                                echo '<button type="button" class="btn btn-sm btn-danger delete-category" 
+                                        data-id="' . $category['category_id'] . '">
+                                        <i class="fas fa-trash"></i>
+                                    </button>';
+                                echo '</div>';
+                                echo '</div>';
+                            }
+                        } else {
+                            echo '<div class="list-group-item text-center text-muted">No categories found</div>';
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                        <i class="fas fa-plus me-2"></i>Add New Category
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">
+                        <i class="fas fa-edit me-2"></i>Edit Category
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="../helpers/edit_category.php" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" id="editCategoryId" name="category_id">
+                        <div class="mb-3">
+                            <label for="editCategoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="editCategoryName" name="category_name" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/manage_product.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle edit category button clicks
+        document.querySelectorAll('.edit-category').forEach(button => {
+            button.addEventListener('click', function() {
+                const categoryId = this.getAttribute('data-id');
+                const categoryName = this.getAttribute('data-name');
+                
+                // Set the form values
+                document.getElementById('editCategoryId').value = categoryId;
+                document.getElementById('editCategoryName').value = categoryName;
+                
+                // Show the modal
+                const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                editModal.show();
+            });
+        });
+
+        // Handle delete category button clicks
+        document.querySelectorAll('.delete-category').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+                    const categoryId = this.getAttribute('data-id');
+                    
+                    fetch('../helpers/delete_category.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'category_id=' + encodeURIComponent(categoryId)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Category deleted successfully');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the category');
+                    });
+                }
+            });
+        });
+
+        // Add form submission handler for edit category
+        document.getElementById('editCategoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('../helpers/edit_category.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the category');
+            });
+        });
+    });
+    </script>
 
 </body>
 

@@ -62,6 +62,24 @@ if ($userId) {
                 </li>
 
                 <!-- Notifications Icon -->
+                <li class="nav-item">
+                    <a class="nav-link position-relative" href="../includes/notifications.php">
+                        <ion-icon name="notifications-outline" size="large"></ion-icon>
+                        <?php
+                        // Get unread notifications count
+                        $notif_sql = "SELECT COUNT(*) as count FROM notifications WHERE receiver_id = ? AND is_read = 0";
+                        $notif_stmt = $conn->prepare($notif_sql);
+                        $notif_stmt->bind_param("i", $_SESSION['userId']);
+                        $notif_stmt->execute();
+                        $notif_count = $notif_stmt->get_result()->fetch_assoc()['count'];
+                        if ($notif_count > 0):
+                        ?>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">
+                            <?= $notif_count ?>
+                        </span>
+                        <?php endif; ?>
+                    </a>
+                </li>
                 
                 <!-- Messages Icon -->
                 <li class="nav-item">
@@ -77,11 +95,6 @@ if ($userId) {
                     </a>
                 </li>
                 
-                <li class="nav-item">
-                    <a class="nav-link" href="notifications.php">
-                        <ion-icon name="notifications-outline" size="large"></ion-icon> <!-- Ionicons Notifications Icon -->
-                    </a>
-                </li>
                 <!-- Dropdown User Menu (Optional for logout or settings) -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
@@ -118,6 +131,30 @@ if ($userId) {
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         updateCartCount();
+    });
+
+    // Function to update notification count
+    function updateNotificationCount() {
+        $.get('../includes/get_unread_count.php', function(count) {
+            const badge = $('.notification-badge');
+            if (count > 0) {
+                if (badge.length) {
+                    badge.text(count);
+                } else {
+                    $('.nav-link[href="../includes/notifications.php"]').append(
+                        `<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge">${count}</span>`
+                    );
+                }
+            } else {
+                badge.remove();
+            }
+        });
+    }
+
+    // Update count when page loads and every 30 seconds
+    $(document).ready(function() {
+        updateNotificationCount();
+        setInterval(updateNotificationCount, 30000);
     });
 </script>
 

@@ -16,11 +16,9 @@ body {
 
 /* Section Titles */
 .section-title {
-    font-size: 28px;
-    color: #7d4f2a; /* Earthy brown for theme */
-    font-weight: 700;
-    text-transform: uppercase;
-    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
 }
 
 /* Filter Buttons */
@@ -141,4 +139,567 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Products Scroll Container */
+.products-scroll-container {
+    position: relative;
+    padding: 1rem 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.products-scroll-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 1rem 0.5rem;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    width: 100%;
+    cursor: grab;
+}
+
+.products-scroll-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.products-scroll-wrapper:active {
+    cursor: grabbing;
+}
+
+/* Best Products and Ingredients Sections */
+.best-products-section,
+.best-ingredients-section {
+    background-color: #fff5f5;
+    position: relative;
+    margin-bottom: 2rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.best-ingredients-section {
+    background-color: #f0f7ff; /* Light blue background to differentiate */
+}
+
+.best-ingredients-section .section-title::after {
+    background: linear-gradient(to right, #4a90e2, #67b26f); /* Different gradient for ingredients */
+}
+
+.best-products-section .product-card,
+.best-ingredients-section .product-card {
+    flex: 0 0 280px;
+    min-width: 280px; /* Ensure minimum width */
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+    margin: 0.5rem;
+}
+
+.best-products-section .product-card:hover,
+.best-ingredients-section .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.best-products-section .product-image,
+.best-ingredients-section .product-image {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.best-products-section .product-image img,
+.best-ingredients-section .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.best-products-section .product-card:hover .product-image img,
+.best-ingredients-section .product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.best-products-section .product-info,
+.best-ingredients-section .product-info {
+    padding: 1rem;
+    background: white;
+}
+
+.best-products-section .product-name,
+.best-ingredients-section .product-name {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.best-products-section .product-price,
+.best-ingredients-section .product-price {
+    color: #e74c3c;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.best-products-section .store-name,
+.best-ingredients-section .store-name {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* Scroll Buttons for both sections */
+.best-products-section .scroll-button,
+.best-ingredients-section .scroll-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.best-products-section .scroll-button:hover,
+.best-ingredients-section .scroll-button:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+.best-products-section .scroll-button-left,
+.best-ingredients-section .scroll-button-left {
+    left: 10px;
+}
+
+.best-products-section .scroll-button-right,
+.best-ingredients-section .scroll-button-right {
+    right: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .best-products-section .product-card,
+    .best-ingredients-section .product-card {
+        flex: 0 0 240px;
+    }
+    
+    .best-products-section .product-image,
+    .best-ingredients-section .product-image {
+        height: 180px;
+    }
+}
+
+@media (max-width: 576px) {
+    .best-products-section .product-card,
+    .best-ingredients-section .product-card {
+        flex: 0 0 200px;
+    }
+    
+    .best-products-section .product-image,
+    .best-ingredients-section .product-image {
+        height: 160px;
+    }
+}
+
+/* Top Vendors Section */
+.top-vendors-section {
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.vendors-tabs {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.vendors-tabs .btn-group {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.vendors-tabs .btn {
+    padding: 0.5rem 2rem;
+    border: none;
+    background: white;
+    color: #2c3e50;
+}
+
+.vendors-tabs .btn.active {
+    background: #ff6b6b;
+    color: white;
+}
+
+.vendors-scroll-container {
+    position: relative;
+    padding: 1rem 0;
+    overflow: hidden;
+}
+
+.vendors-scroll-wrapper {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 1rem 0.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.vendors-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.vendor-card {
+    flex: 0 0 250px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.vendor-card:hover {
+    transform: translateY(-5px);
+}
+
+.vendor-image {
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.vendor-info {
+    padding: 1rem;
+    text-align: center;
+}
+
+.vendor-name {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.vendor-stats {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+/* No Data Messages */
+.no-products-message,
+.no-vendors-message {
+    width: 100%;
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.no-products-message p,
+.no-vendors-message p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Adjust scroll container for no data */
+.products-scroll-wrapper:empty,
+.vendors-scroll-wrapper:empty {
+    display: none;
+}
+
+/* Common Styles */
+.see-all-link {
+    color: #ee4d2d;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.see-all-link:hover {
+    color: #ff6b6b;
+}
+
+/* Scroll Container Styles */
+.deals-scroll-container,
+.vendors-scroll-container {
+    position: relative;
+    overflow: hidden;
+    padding: 0.5rem 0;
+}
+
+.deals-scroll-wrapper,
+.vendors-scroll-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0.5rem 2rem;
+}
+
+.deals-scroll-wrapper::-webkit-scrollbar,
+.vendors-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+/* Scroll Buttons */
+.scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.scroll-btn:hover {
+    background: #f5f5f5;
+}
+
+.prev-btn {
+    left: 5px;
+}
+
+.next-btn {
+    right: 5px;
+}
+
+/* Kakanin Section */
+.kakanin-deals-section {
+    background: #fff5f5;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.kakanin-card {
+    flex: 0 0 160px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Ingredients Section */
+.ingredients-deals-section {
+    background: #f0f7ff;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.ingredient-card {
+    flex: 0 0 160px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Common Deal Card Styles */
+.deal-img-wrap {
+    position: relative;
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+}
+
+.deal-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.deal-info {
+    padding: 0.5rem;
+}
+
+.deal-title {
+    font-size: 0.85rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    height: 2.4em;
+}
+
+.deal-price {
+    color: #ee4d2d;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.deal-badges {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.35rem;
+    border-radius: 2px;
+    font-weight: normal;
+}
+
+.badge.selling-fast {
+    background: #ee4d2d;
+    color: white;
+}
+
+.badge.sold-count {
+    background: #fef6f5;
+    color: #ee4d2d;
+    border: 1px solid #ee4d2d;
+}
+
+/* Sellers Section */
+.sellers-section {
+    background: #fff8e7;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.seller-card {
+    flex: 0 0 200px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Suppliers Section */
+.suppliers-section {
+    background: #f5f8ff;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.supplier-card {
+    flex: 0 0 200px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+/* Common Vendor Card Styles */
+.vendor-img-wrap {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.vendor-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vendor-info {
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.vendor-name {
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    color: #ee4d2d;
+    border-color: #ee4d2d;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.btn-outline-primary:hover {
+    background: #ee4d2d;
+    color: white;
+    border-color: #ee4d2d;
+}
+
+/* No Items Message */
+.no-items-message {
+    width: 100%;
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .kakanin-card,
+    .ingredient-card {
+        flex: 0 0 140px;
+    }
+    
+    .seller-card,
+    .supplier-card {
+        flex: 0 0 180px;
+    }
+    
+    .deal-img-wrap {
+        height: 140px;
+    }
+    
+    .vendor-img-wrap {
+        height: 100px;
+    }
+}
+
+@media (max-width: 576px) {
+    .kakanin-card,
+    .ingredient-card {
+        flex: 0 0 120px;
+    }
+    
+    .seller-card,
+    .supplier-card {
+        flex: 0 0 160px;
+    }
+    
+    .deal-img-wrap {
+        height: 120px;
+    }
+    
+    .vendor-img-wrap {
+        height: 90px;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+    }
 }

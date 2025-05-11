@@ -50,15 +50,15 @@
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="editProductForm" method="POST" action="../helpers/edit_product.php" enctype="multipart/form-data">
+            <form method="POST" action="../helpers/edit_product.php" enctype="multipart/form-data">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
-                        <!-- Ensure product_id is included -->
-                        <input type="hidden" id="editProductId" name="product_id">
+                        <!-- Hidden product ID field -->
+                        <input type="hidden" name="product_id" id="editProductId">
 
                         <div class="col-md-12">
                             <label for="editProductName" class="form-label">Product Name</label>
@@ -70,68 +70,71 @@
                         </div>
                         <div class="col-md-6">
                             <label for="editPrice" class="form-label">Price</label>
-                            <input type="number" class="form-control" id="editPrice" name="price" step="0.01" required>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="number" class="form-control" id="editPrice" name="price" step="0.01" min="0" required>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="editQuantity" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="editQuantity" name="quantity" required>
+                            <input type="number" class="form-control" id="editQuantity" name="quantity" min="0" required>
                         </div>
-                        <div class="col-md-12">
-                            <label for="editImage" class="form-label">Image</label>
-                            <input type="file" class="form-control" id="editImage" name="image_url" accept="image/*">
-                            <br>
-                            <img id="editImagePreview" src="" alt="Product Image" width="100" style="display: none; margin-top: 10px;">
-                        </div>
-
-
                         <div class="col-md-12">
                             <label for="editCategory" class="form-label">Category</label>
                             <select class="form-select" id="editCategory" name="category_id" required>
+                                <option value="">Select a category</option>
                                 <?php
-                                $conn = new mysqli('localhost', 'root', '', 'tastyph1');
-                                $sql = "SELECT category_id, name FROM categories";
-                                $result = $conn->query($sql);
+                                // Fetch categories
+                                $categoriesQuery = "SELECT category_id, name FROM categories ORDER BY name";
+                                $categoriesResult = $conn->query($categoriesQuery);
 
-                                if ($result->num_rows > 0) {
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<option value='" . $row['category_id'] . "'>" . $row['name'] . "</option>";
+                                if ($categoriesResult && $categoriesResult->num_rows > 0) {
+                                    while ($category = $categoriesResult->fetch_assoc()) {
+                                        echo "<option value='" . htmlspecialchars($category['category_id']) . "'>" . 
+                                             htmlspecialchars($category['name']) . "</option>";
                                     }
-                                } else {
-                                    echo "<option value=''>No categories available</option>";
                                 }
-                                $conn->close();
                                 ?>
                             </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="editImage" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="editImage" name="image_url" accept="image/*">
+                            <div id="editImagePreview" class="mt-2" style="display: none;">
+                                <img src="" alt="Product Preview" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Update Product</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Update Product
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="addCategoryForm" method="POST" action="../helpers/add_category.php">
+            <form id="editCategoryForm" method="POST" action="../helpers/edit_category.php">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addCategoryModalLabel">Add Category</h5>
+                    <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <input type="hidden" id="editCategoryId" name="category_id">
                     <div class="form-group mb-3">
-                        <label for="category_name" class="form-label">Category Name</label>
-                        <input type="text" class="form-control" id="category_name" name="name" required>
+                        <label for="editCategoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="editCategoryName" name="category_name" required>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Add Category</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>

@@ -70,6 +70,24 @@ if (!$stmt->execute()) {
 }
 $orderId = $stmt->insert_id;
 
+// Get seller IDs for the ordered items
+$seller_sql = "SELECT DISTINCT p.seller_id 
+               FROM cart c 
+               JOIN products p ON c.product_id = p.product_id 
+               WHERE c.cart_id IN (" . implode(',', $itemIds) . ")";
+$seller_result = $conn->query($seller_sql);
+
+// Create notifications for each seller
+while ($seller = $seller_result->fetch_assoc()) {
+    if ($seller['seller_id']) {
+        $notification_message = "New order #$orderId has been placed!";
+        $notif_sql = "INSERT INTO notifications (sender_id, receiver_id, message) VALUES (?, ?, ?)";
+        $notif_stmt = $conn->prepare($notif_sql);
+        $notif_stmt->bind_param("iis", $userId, $seller['seller_id'], $notification_message);
+        $notif_stmt->execute();
+    }
+}
+
 // Insert order_items (including variants)
 foreach ($itemIds as $cartId) {
     $item = $cartData[$cartId];

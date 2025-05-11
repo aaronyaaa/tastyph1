@@ -98,84 +98,267 @@ foreach ($sales as $month => $data) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sales Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Dashboard - Sales Analytics</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/sales.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --header-height: 60px;
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            display: flex;
+            justify-content: center;   /* Center horizontally */
+            align-items: flex-start;   /* Align to top, or use center for vertical centering */
+            min-height: calc(100vh - 60px);
+            margin-top: 60px;
+            background: #f5f6fa;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-color);
+            color: white;
+            position: fixed;
+            height: calc(100vh - 60px); /* Adjust for navbar */
+            padding: 1rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            top: 60px; /* Position below navbar */
+        }
+
+        .sidebar-header {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background: var(--secondary-color);
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 2rem 1rem 3rem 1rem;
+        }
+
+        .dashboard-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .best-sellers-table {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .best-sellers-table th {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .period-selector {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-<?php include("../includes/nav_" . strtolower($userType) . ".php"); ?>
+    <?php include("../includes/nav_" . strtolower($userType) . ".php"); ?>
 
-<div class="container mt-5">
-    <h2 class="mb-4 text-center text-light">📊 Sales Tracker</h2>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+       
 
-    <!-- Sales Overview Card -->
-    <div class="card mb-4 shadow-sm futuristic-card">
-        <div class="card-header">
-            <h5 class="card-title">Sales Overview</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Total Revenue:</h6>
-                    <h3>₱<?= number_format($totalRevenue, 2) ?></h3>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="dashboard-header">
+                <h2><i class="bi bi-graph-up"></i> Sales Analytics Dashboard</h2>
+                <p class="text-muted">Welcome back, <?php echo htmlspecialchars($_SESSION['business_name'] ?? 'Supplier'); ?></p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="icon text-primary">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="value">₱<?= number_format($totalRevenue, 2) ?></div>
+                        <div class="label">Total Revenue</div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h6>Total Orders:</h6>
-                    <h3><?= count($totalOrders) ?></h3>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="icon text-success">
+                            <i class="bi bi-cart-check"></i>
+                        </div>
+                        <div class="value"><?= count($totalOrders) ?></div>
+                        <div class="label">Total Orders</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="icon text-warning">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="value"><?= array_sum($bestSellers) ?></div>
+                        <div class="label">Total Items Sold</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Period Selector -->
+            <div class="period-selector">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0"><i class="bi bi-calendar"></i> Sales Period</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="chartType">
+                            <option value="monthly">Monthly Overview</option>
+                            <option value="daily">Daily Analysis</option>
+                            <option value="weekly">Weekly Trends</option>
+                            <option value="yearly">Yearly Summary</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Chart -->
+            <div class="chart-container">
+                <h5 class="mb-4"><i class="bi bi-bar-chart"></i> Sales Performance</h5>
+                <canvas id="salesChart" height="300"></canvas>
+            </div>
+
+            <!-- Best Sellers Table -->
+            <div class="best-sellers-table">
+                <h5 class="mb-4"><i class="bi bi-trophy"></i> Best-Selling Products</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Units Sold</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            arsort($bestSellers); 
+                            $counter = 0;
+                            foreach ($bestSellers as $name => $qty): 
+                                $counter++;
+                                $statusClass = $counter <= 3 ? 'success' : 'primary';
+                            ?>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-<?= $statusClass ?> me-2">#<?= $counter ?></span>
+                                            <?= htmlspecialchars($name) ?>
+                                        </div>
+                                    </td>
+                                    <td><?= $qty ?> units</td>
+                                    <td>
+                                        <span class="badge bg-<?= $statusClass ?>">
+                                            <?= $counter <= 3 ? 'Top Seller' : 'Regular' ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dropdown for selecting time period with an icon -->
-    <div class="mb-4">
-        <label for="chartType" class="form-label"><i class="bi bi-gear"></i> Select Time Period:</label>
-        <select class="form-select" id="chartType">
-            <option value="monthly">Monthly</option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="yearly">Yearly</option>
-        </select>
-    </div>
-
-    <!-- Chart for Sales -->
-    <div class="card mb-4 shadow-sm futuristic-card">
-        <div class="card-header">
-            <h5 class="card-title">📈 Sales Chart</h5>
-        </div>
-        <div class="card-body">
-            <canvas id="salesChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Best-Selling Items with Images -->
-    <div class="card mb-4 shadow-sm futuristic-card">
-        <div class="card-header">
-            <h5 class="card-title">🏆 Best-Selling Items</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-sm table-hover">
-                <thead><tr><th>Item</th><th>Total Sold</th></tr></thead>
-                <tbody>
-                    <?php arsort($bestSellers); foreach ($bestSellers as $name => $qty): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($name) ?></td>
-                            <td><?= $qty ?></td>
-
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../js/sales.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/sales.js"></script>
 </body>
 </html>

@@ -1,36 +1,67 @@
 $(document).ready(function () {
+    // Handle edit product button clicks
     $(".edit-product").click(function () {
-        let productId = $(this).data("id");
-        let productName = $(this).data("name");
-        let description = $(this).data("description");
-        let price = $(this).data("price");
-        let quantity = $(this).data("quantity");
-        let categoryId = $(this).data("category");
-        let imageUrl = $(this).data("image");
+        const productId = $(this).data("id");
+        const productName = $(this).data("name");
+        const description = $(this).data("description");
+        const price = $(this).data("price");
+        const quantity = $(this).data("quantity");
+        const categoryId = $(this).data("category");
+        const imageUrl = $(this).data("image");
 
-        console.log("Editing Product ID:", productId); // Debugging output
+        console.log("Editing Product:", {
+            id: productId,
+            name: productName,
+            category: categoryId
+        }); // Debugging output
 
-        // Populate the modal form fields
+        // Set form values
         $("#editProductId").val(productId);
         $("#editProductName").val(productName);
         $("#editDescription").val(description);
         $("#editPrice").val(price);
         $("#editQuantity").val(quantity);
-        $("#editCategory").val(categoryId);
+        
+        // Handle category selection
+        const categorySelect = $("#editCategory");
+        if (categoryId) {
+            categorySelect.val(categoryId);
+            console.log("Setting category to:", categoryId); // Debugging output
+        } else {
+            categorySelect.val(""); // Reset to default if no category
+            console.log("No category selected"); // Debugging output
+        }
 
         // Show image preview if an image exists
+        const imagePreview = $("#editImagePreview");
         if (imageUrl) {
-            $("#editImagePreview").attr("src", imageUrl).show();
+            imagePreview.find("img").attr("src", imageUrl);
+            imagePreview.show();
         } else {
-            $("#editImagePreview").hide();
+            imagePreview.hide();
         }
     });
-});
 
+    // Handle image preview on file selection
+    $("#editImage").change(function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            const previewImg = $("#editImagePreview img");
+            const imagePreview = $("#editImagePreview");
 
-$(document).ready(function () {
+            reader.onload = function(e) {
+                previewImg.attr("src", e.target.result);
+                imagePreview.show();
+            }
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Handle delete product
     $(".delete-product").click(function () {
-        let productId = $(this).data("id");
+        const productId = $(this).data("id");
 
         if (confirm("Are you sure you want to delete this product?")) {
             $.ajax({
@@ -55,9 +86,75 @@ $(document).ready(function () {
             });
         }
     });
+
+    // Handle edit category button clicks
+    $(".edit-category").click(function() {
+        const categoryId = $(this).data("id");
+        const categoryName = $(this).data("name");
+        
+        // Set the form values
+        $("#editCategoryId").val(categoryId);
+        $("#editCategoryName").val(categoryName);
+        
+        // Show the modal
+        const editModal = new bootstrap.Modal(document.getElementById("editCategoryModal"));
+        editModal.show();
+    });
+
+    // Handle delete category button clicks
+    $(".delete-category").click(function() {
+        const categoryId = $(this).data("id");
+        
+        if (confirm("Are you sure you want to delete this category? This action cannot be undone.")) {
+            $.ajax({
+                url: "../helpers/delete_category.php",
+                type: "POST",
+                data: { category_id: categoryId },
+                dataType: "json",
+                success: function(response) {
+                    if (response.success) {
+                        alert("Category deleted successfully!");
+                        location.reload();
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while deleting the category");
+                }
+            });
+        }
+    });
+
+    // Handle business hours toggles
+    $(".availability-toggle").change(function() {
+        const targetId = $(this).data("target");
+        const timeInputs = $("#" + targetId);
+        const timeFields = timeInputs.find("input");
+        const hiddenInput = $(this).closest(".form-check").find("input[type='hidden']");
+
+        if (this.checked) {
+            timeInputs.removeClass("d-none");
+            timeFields.prop("disabled", false);
+            hiddenInput.val("1");
+        } else {
+            timeInputs.addClass("d-none");
+            timeFields.prop("disabled", true);
+            hiddenInput.val("0");
+        }
+    });
+
+    // Ensure all schedules update correctly on form submit
+    $("#businessHoursForm").submit(function() {
+        $(".availability-toggle").each(function() {
+            const hiddenInput = $(this).closest(".form-check").find("input[type='hidden']");
+            if (!this.checked) {
+                hiddenInput.val("0");
+            }
+        });
+    });
 });
-
-
 
 // Function that will be triggered when the "Start Cooking" button is clicked
 function startCooking() {
@@ -73,39 +170,6 @@ document.addEventListener("DOMContentLoaded", function () {
         startCookingButton.addEventListener("click", startCooking);
     }
 });
-
-
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".availability-toggle").forEach(toggle => {
-        toggle.addEventListener("change", function () {
-            let targetId = this.getAttribute("data-target");
-            let timeInputs = document.getElementById(targetId);
-            let timeFields = timeInputs.querySelectorAll("input");
-            let hiddenInput = this.closest(".form-check").querySelector("input[type='hidden']"); 
-
-            if (this.checked) {
-                timeInputs.classList.remove("d-none");
-                timeFields.forEach(input => input.removeAttribute("disabled"));
-                hiddenInput.value = "1";
-            } else {
-                timeInputs.classList.add("d-none");
-                timeFields.forEach(input => input.setAttribute("disabled", "disabled"));
-                hiddenInput.value = "0";
-            }
-        });
-    });
-
-    // Ensure all schedules update correctly
-    document.querySelector("#businessHoursForm").addEventListener("submit", function () {
-        document.querySelectorAll(".availability-toggle").forEach(toggle => {
-            let hiddenInput = toggle.closest(".form-check").querySelector("input[type='hidden']");
-            if (!toggle.checked) {
-                hiddenInput.value = "0"; 
-            }
-        });
-    });
-});
-
 
 // When the Edit button is clicked, populate the modal with the product details
 document.querySelectorAll('.edit-product').forEach(button => {

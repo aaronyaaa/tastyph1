@@ -33,15 +33,15 @@ function setIngredientId(id) {
 }
 
 function showVariants(ingredientId, ingredientName) {
-    const ingredientTable = document.getElementById("ingredientTable");
-    const variantTable = document.getElementById("variantTable");
+    const ingredientGrid = document.getElementById("ingredientGrid");
+    const variantGrid = document.getElementById("variantGrid");
     const variantHeader = document.getElementById("variantHeader");
     const variantBody = document.getElementById("variantBody");
 
-    if (!ingredientTable || !variantTable || !variantHeader || !variantBody) return;
+    if (!ingredientGrid || !variantGrid || !variantHeader || !variantBody) return;
 
-    ingredientTable.style.display = "none";
-    variantTable.style.display = "block";
+    ingredientGrid.style.display = "none";
+    variantGrid.style.display = "block";
     variantHeader.innerText = `Variants of "${ingredientName}"`;
 
     fetch(`../helpers/fetch_variants.php?ingredient_id=${ingredientId}`)
@@ -50,40 +50,60 @@ function showVariants(ingredientId, ingredientName) {
             variantBody.innerHTML = "";
 
             if (!data.length) {
-                variantBody.innerHTML = `<tr><td colspan="6" class="text-muted">No variants available.</td></tr>`;
+                variantBody.innerHTML = `
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No variants available.</p>
+                    </div>`;
                 return;
             }
 
             data.forEach(variant => {
                 variantBody.innerHTML += `
-                <tr>
-                  <td>${variant.variant_name}</td>
-                  <td>₱${parseFloat(variant.price).toFixed(2)}</td>
-                  <td>${variant.quantity}</td>
-                  <td>${variant.quantity_value} ${variant.unit_type}</td>
-                  <td><img src="${variant.image_url}" width="50"></td>
-                  <td>
-                    <button class="btn btn-warning btn-sm" onclick='editVariant(${JSON.stringify(variant)})'>Edit</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteVariant(${variant.variant_id})">Delete</button>
-                  </td>
-                </tr>
-              `;
-              
+                    <div class="col-md-4 col-lg-3 mb-4">
+                        <div class="product-card">
+                            <img src="${variant.image_url}" alt="${variant.variant_name}" class="product-image">
+                            <div class="product-info">
+                                <h5>${variant.variant_name}</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h5 mb-0">₱${parseFloat(variant.price).toFixed(2)}</span>
+                                    <span class="badge bg-${variant.quantity > 0 ? 'success' : 'danger'}">
+                                        ${variant.quantity} in stock
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-2">
+                                    <i class="fas fa-box"></i> ${variant.quantity_value} ${variant.unit_type}
+                                </p>
+                                <div class="mt-3 d-flex gap-2">
+                                    <button class="btn btn-warning btn-sm flex-grow-1" 
+                                            onclick='editVariant(${JSON.stringify(variant)})'>
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" 
+                                            onclick="deleteVariant(${variant.variant_id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
             });
         })
         .catch(error => {
             console.error("Error fetching variants:", error);
-            variantBody.innerHTML = `<tr><td colspan="6" class="text-danger">Failed to load variants.</td></tr>`;
+            variantBody.innerHTML = `
+                <div class="col-12 text-center">
+                    <p class="text-danger">Failed to load variants.</p>
+                </div>`;
         });
 }
 
 function backToIngredients() {
-    const variantTable = document.getElementById("variantTable");
-    const ingredientTable = document.getElementById("ingredientTable");
+    const ingredientGrid = document.getElementById("ingredientGrid");
+    const variantGrid = document.getElementById("variantGrid");
 
-    if (variantTable && ingredientTable) {
-        variantTable.style.display = "none";
-        ingredientTable.style.display = "block";
+    if (ingredientGrid && variantGrid) {
+        variantGrid.style.display = "none";
+        ingredientGrid.style.display = "grid";
     }
 }
 
