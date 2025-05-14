@@ -198,8 +198,8 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
             <div class="store-sidebar">
                 <div class="quick-actions">
                     <h4>Quick Actions</h4>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                        <i class="fas fa-plus"></i> Add Product
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#ingredientsInventoryModal">
+                        <i class="fas fa-box"></i> Ingredients Inventory
                     </button>
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRecipeModal">
                         <i class="fas fa-utensils"></i> Add Recipe
@@ -677,6 +677,166 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
         </div>
     </div>
 
+    <!-- Ingredients Inventory Modal -->
+    <div class="modal fade" id="ingredientsInventoryModal" tabindex="-1" aria-labelledby="ingredientsInventoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="ingredientsInventoryModalLabel">
+                        <i class="fas fa-box me-2"></i>Ingredients Inventory
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="ingredientsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="base-tab" data-bs-toggle="tab" data-bs-target="#baseIngredients" type="button" role="tab">
+                                Base Ingredients
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="variants-tab" data-bs-toggle="tab" data-bs-target="#ingredientVariants" type="button" role="tab">
+                                Ingredient Variants
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="ingredientsTabContent">
+                        <!-- Base Ingredients Tab -->
+                        <div class="tab-pane fade show active" id="baseIngredients" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th>Ingredient Name</th>
+                                            <th>Description</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Type</th>
+                                            <th>Price</th>
+                                            <th>Date Added</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Fetch base ingredients inventory data
+                                        $ingredientsSql = "SELECT * FROM ingredients_inventory WHERE seller_id = ? ORDER BY date_added DESC";
+                                        $ingredientsStmt = $conn->prepare($ingredientsSql);
+                                        $ingredientsStmt->bind_param("i", $userId);
+                                        $ingredientsStmt->execute();
+                                        $ingredientsResult = $ingredientsStmt->get_result();
+
+                                        if ($ingredientsResult->num_rows > 0) {
+                                            while ($ingredient = $ingredientsResult->fetch_assoc()) {
+                                                echo "<tr>";
+                                                echo "<td>" . htmlspecialchars($ingredient['ingredient_name']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($ingredient['description']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($ingredient['quantity']) . " " . htmlspecialchars($ingredient['unit_type']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($ingredient['unit_type']) . "</td>";
+                                                echo "<td>₱" . number_format($ingredient['price'], 2) . "</td>";
+                                                echo "<td>" . date('M d, Y', strtotime($ingredient['date_added'])) . "</td>";
+                                                echo "<td>
+                                                    <button class='btn btn-sm btn-info view-variants' 
+                                                            data-ingredient-id='" . $ingredient['ingredient_id'] . "'
+                                                            data-bs-toggle='tooltip' 
+                                                            title='View Variants'>
+                                                        <i class='fas fa-list'></i>
+                                                    </button>
+                                                </td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='7' class='text-center'>No ingredients found in inventory</td></tr>";
+                                        }
+                                        $ingredientsStmt->close();
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Ingredient Variants Tab -->
+                        <div class="tab-pane fade" id="ingredientVariants" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th>Base Ingredient</th>
+                                            <th>Variant Name</th>
+                                            <th>Image</th>
+                                            <th>Quantity</th>
+                                            <th>Unit Type</th>
+                                            <th>Price</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        // Fetch ingredient variants with base ingredient information
+                                        $variantsSql = "SELECT v.*, i.ingredient_name 
+                                                      FROM ingredients_variants v 
+                                                      INNER JOIN ingredients_inventory i ON v.ingredient_id = i.ingredient_id 
+                                                      WHERE i.seller_id = ? 
+                                                      ORDER BY v.created_at DESC";
+                                        $variantsStmt = $conn->prepare($variantsSql);
+                                        $variantsStmt->bind_param("i", $userId);
+                                        $variantsStmt->execute();
+                                        $variantsResult = $variantsStmt->get_result();
+
+                                        if ($variantsResult->num_rows > 0) {
+                                            while ($variant = $variantsResult->fetch_assoc()) {
+                                                echo "<tr>";
+                                                echo "<td>" . htmlspecialchars($variant['ingredient_name']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($variant['variant_name']) . "</td>";
+                                                echo "<td>";
+                                                if (!empty($variant['image_url'])) {
+                                                    echo "<img src='" . htmlspecialchars($variant['image_url']) . "' 
+                                                             alt='Variant Image' 
+                                                             class='img-thumbnail' 
+                                                             style='max-width: 50px; max-height: 50px;'>";
+                                                } else {
+                                                    echo "<span class='text-muted'>No image</span>";
+                                                }
+                                                echo "</td>";
+                                                echo "<td>" . htmlspecialchars($variant['quantity']) . " " . htmlspecialchars($variant['unit_type']) . "</td>";
+                                                echo "<td>" . htmlspecialchars($variant['unit_type']) . "</td>";
+                                                echo "<td>₱" . number_format($variant['price'], 2) . "</td>";
+                                                echo "<td>" . date('M d, Y', strtotime($variant['created_at'])) . "</td>";
+                                                echo "<td>
+                                                    <button class='btn btn-sm btn-warning edit-variant' 
+                                                            data-variant-id='" . $variant['variant_id'] . "'
+                                                            data-bs-toggle='tooltip' 
+                                                            title='Edit Variant'>
+                                                        <i class='fas fa-edit'></i>
+                                                    </button>
+                                                    <button class='btn btn-sm btn-danger delete-variant' 
+                                                            data-variant-id='" . $variant['variant_id'] . "'
+                                                            data-bs-toggle='tooltip' 
+                                                            title='Delete Variant'>
+                                                        <i class='fas fa-trash'></i>
+                                                    </button>
+                                                </td>";
+                                                echo "</tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='8' class='text-center'>No variants found</td></tr>";
+                                        }
+                                        $variantsStmt->close();
+                                        ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -751,6 +911,42 @@ if (isset($_SESSION['usertype']) && $_SESSION['usertype'] === 'seller' && isset(
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while updating the category');
+            });
+        });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Handle view variants button clicks
+        document.querySelectorAll('.view-variants').forEach(button => {
+            button.addEventListener('click', function() {
+                const ingredientId = this.getAttribute('data-ingredient-id');
+                // Switch to variants tab
+                document.getElementById('variants-tab').click();
+                // You can add additional filtering logic here if needed
+            });
+        });
+
+        // Handle edit variant button clicks
+        document.querySelectorAll('.edit-variant').forEach(button => {
+            button.addEventListener('click', function() {
+                const variantId = this.getAttribute('data-variant-id');
+                // Add your edit variant logic here
+                console.log('Edit variant:', variantId);
+            });
+        });
+
+        // Handle delete variant button clicks
+        document.querySelectorAll('.delete-variant').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete this variant?')) {
+                    const variantId = this.getAttribute('data-variant-id');
+                    // Add your delete variant logic here
+                    console.log('Delete variant:', variantId);
+                }
             });
         });
     });
