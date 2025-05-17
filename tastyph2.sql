@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 10, 2025 at 01:24 AM
+-- Generation Time: May 17, 2025 at 03:33 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -174,7 +174,7 @@ INSERT INTO `cart` (`cart_id`, `user_id`, `product_id`, `ingredient_id`, `varian
 (35, 21, NULL, 4, NULL, 4, 276.00, '2025-03-14 17:31:25'),
 (58, 13, NULL, 7, NULL, 1, 100.00, '2025-03-15 03:59:20'),
 (112, 12, 34, NULL, NULL, 1, 50.00, '2025-04-25 21:44:05'),
-(113, 1, 34, NULL, NULL, 1, 50.00, '2025-04-26 06:36:38');
+(116, 12, NULL, 7, NULL, 1, 100.00, '2025-05-11 15:03:53');
 
 -- --------------------------------------------------------
 
@@ -243,7 +243,7 @@ CREATE TABLE `ingredients` (
 
 INSERT INTO `ingredients` (`ingredient_id`, `supplier_id`, `ingredient_name`, `description`, `price`, `quantity`, `quantity_value`, `unit_type`, `created_at`, `category_id`, `image_url`) VALUES
 (1, 12, 'lumpia wrapper', '30 pcs per Pack ', 28.00, -4, 30, 'pcs', '2024-12-18 14:23:37', 4, '../uploads/1741929792_lumpia.jpg'),
-(2, 12, 'Ube', 'Per Kilo', 180.00, 8, 300, 'g', '2024-12-18 14:27:16', 4, '../uploads/1741929804_ube.jpeg'),
+(2, 12, 'Ube', 'Per Kilo', 180.00, 7, 300, 'g', '2024-12-18 14:27:16', 4, '../uploads/1741929804_ube.jpeg'),
 (3, 12, 'Condense Milk', '1 can = 300g\r\n', 86.00, 22, 300, 'g', '2024-12-18 14:31:44', 6, '../uploads/1741929823_alaska.jpg'),
 (4, 12, 'Ube Flavor', 'per bottle', 69.00, 23, 1, 'bottle', '2024-12-18 14:34:13', 2, '../uploads/1741929833_f50ad21a8af6d8f55fed07471477349e.jpg'),
 (5, 12, 'Oil', '1kg = 1000g', 28.00, 23, 1000, 'ml', '2024-12-18 14:38:09', 4, '../uploads/1741929842_135663.jpg'),
@@ -259,7 +259,7 @@ INSERT INTO `ingredients` (`ingredient_id`, `supplier_id`, `ingredient_name`, `d
 (15, 23, 'Parmesan Cheese', 'Grated cheese', 400.00, 10, 500, 'g', '2025-03-22 06:25:55', 4, '../uploads/1742624755_armesan135g_Front_211111065339.jpg'),
 (16, 23, 'Coconut Milk', 'asd', 50.00, 10, 165, 'ml', '2025-03-22 06:27:32', 4, '../uploads/1742624852_images (11).jpg'),
 (17, 23, 'Fresh Milk', 'asd', 50.00, 10, 250, 'ml', '2025-03-22 06:28:32', 4, '../uploads/1742624912_images (12).jpg'),
-(18, 23, 'Salted Duck Egg', 'large, 25 pesos per piece', 25.00, 120, 1, 'pcs', '2025-03-22 06:31:20', 4, '../uploads/1742625080_images (13).jpg'),
+(18, 23, 'Salted Duck Egg', 'large, 25 pesos per piece', 25.00, 118, 1, 'pcs', '2025-03-22 06:31:20', 4, '../uploads/1742625080_images (13).jpg'),
 (19, 23, 'Grated Coconut', 'asd', 180.00, 10, 500, 'g', '2025-03-22 06:32:18', 4, '../uploads/1742625138_images (14).jpg'),
 (20, 23, 'Raw egg', 'Large,10 pesos per piece', 10.00, 120, 1, 'pcs', '2025-03-22 06:33:43', 4, '../uploads/1742625223_free-range-brown-eggs-full-tray-30-1.jpg'),
 (21, 23, 'Fresh Banana Leaves', '10 inches per cut', 80.00, 50, 250, 'g', '2025-03-22 06:36:03', 4, '../uploads/1742625363_Banana_Leaves_1600x.jpg');
@@ -282,16 +282,17 @@ CREATE TABLE `ingredients_inventory` (
   `seller_id` int(11) DEFAULT NULL,
   `supplier_id` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
-  `date_added` timestamp NOT NULL DEFAULT current_timestamp()
+  `date_added` timestamp NOT NULL DEFAULT current_timestamp(),
+  `variant_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `ingredients_inventory`
 --
 
-INSERT INTO `ingredients_inventory` (`inventory_id`, `ingredient_id`, `ingredient_name`, `description`, `quantity`, `quantity_value`, `unit_type`, `price`, `seller_id`, `supplier_id`, `user_id`, `date_added`) VALUES
-(1, 5, 'Oil', '1kg = 1000g', 1, 1, 'pcs', 28.00, NULL, 12, NULL, '2025-03-17 16:09:29'),
-(2, 4, 'Ube Flavor', 'per bottle', 1, 1, 'pcs', 69.00, NULL, 12, NULL, '2025-03-17 16:10:53');
+INSERT INTO `ingredients_inventory` (`inventory_id`, `ingredient_id`, `ingredient_name`, `description`, `quantity`, `quantity_value`, `unit_type`, `price`, `seller_id`, `supplier_id`, `user_id`, `date_added`, `variant_id`) VALUES
+(1, 5, 'Oil', '1kg = 1000g', 1, 1, 'pcs', 28.00, NULL, 12, NULL, '2025-03-17 16:09:29', NULL),
+(2, 4, 'Ube Flavor', 'per bottle', 1, 1, 'pcs', 69.00, NULL, 12, NULL, '2025-03-17 16:10:53', NULL);
 
 -- --------------------------------------------------------
 
@@ -397,7 +398,13 @@ INSERT INTO `messages` (`message_id`, `sender_id`, `receiver_id`, `message_text`
 (57, 1, 12, 'weq', '2025-03-15 14:10:57', 0, NULL, 0, 'uploads/1742019057_images (7).jpg', ''),
 (58, 1, 23, 'lima lang akong turon pwede ugma mag restock ko', '2025-03-15 14:47:29', 0, NULL, 0, NULL, ''),
 (59, 23, 1, 'okay', '2025-03-15 14:48:06', 0, NULL, 0, NULL, ''),
-(60, 24, 21, 'HAI', '2025-03-26 16:23:45', 0, NULL, 0, NULL, '');
+(60, 24, 21, 'HAI', '2025-03-26 16:23:45', 0, NULL, 0, NULL, ''),
+(61, 1, 15, '', '2025-05-11 17:03:24', 0, NULL, 0, 'uploads/1746954204_f2678c157ca3b7e20968ce5fb4a96ba3.jpg,uploads/1746954204_Infographic - Protect Your Data.jpg,uploads/1746954204_Untitled design.png', ''),
+(62, 1, 15, 'asd', '2025-05-11 17:03:29', 0, NULL, 0, NULL, ''),
+(63, 1, 12, 'i love you', '2025-05-11 17:04:34', 0, NULL, 0, NULL, ''),
+(64, 1, 21, 'i miss you so much', '2025-05-11 17:04:54', 0, NULL, 0, NULL, ''),
+(65, 1, 15, 'asd', '2025-05-11 17:07:20', 0, NULL, 0, NULL, ''),
+(66, 1, 15, 'asdas', '2025-05-17 09:00:35', 0, NULL, 0, NULL, '');
 
 -- --------------------------------------------------------
 
@@ -419,17 +426,20 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`notification_id`, `sender_id`, `receiver_id`, `message`, `is_read`, `created_at`) VALUES
-(1, 19, 1, 'New pre-order request for: asdasd (Qty: 1).', 0, '2025-02-09 11:56:12'),
-(2, 1, 1, 'New pre-order request for: asdas (Qty: 1).', 0, '2025-02-09 12:06:54'),
-(3, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 0, '2025-02-10 06:45:01'),
-(4, 20, 1, 'New pre-order request for: Turon (Qty: 50).', 0, '2025-02-10 09:50:05'),
-(5, 12, 1, 'New pre-order request for: bibingka (Qty: 5).', 0, '2025-03-08 07:36:50'),
-(6, 21, 1, 'New pre-order request for: Ube Cheese Turon (Qty: 20).', 0, '2025-03-08 07:39:34'),
-(7, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 0, '2025-03-13 08:44:30'),
-(8, 1, 1, 'New pre-order request for: Turon (Qty: 2).', 0, '2025-03-13 13:25:35'),
-(9, 1, 1, 'New pre-order request for: bibingkaa (Qty: 1).', 0, '2025-03-13 13:38:00'),
-(10, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 0, '2025-03-13 13:55:56'),
-(11, 23, 1, 'New pre-order request for: Turon (Qty: 20).', 0, '2025-03-13 19:11:46');
+(1, 19, 1, 'New pre-order request for: asdasd (Qty: 1).', 1, '2025-02-09 11:56:12'),
+(2, 1, 1, 'New pre-order request for: asdas (Qty: 1).', 1, '2025-02-09 12:06:54'),
+(3, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 1, '2025-02-10 06:45:01'),
+(4, 20, 1, 'New pre-order request for: Turon (Qty: 50).', 1, '2025-02-10 09:50:05'),
+(5, 12, 1, 'New pre-order request for: bibingka (Qty: 5).', 1, '2025-03-08 07:36:50'),
+(6, 21, 1, 'New pre-order request for: Ube Cheese Turon (Qty: 20).', 1, '2025-03-08 07:39:34'),
+(7, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 1, '2025-03-13 08:44:30'),
+(8, 1, 1, 'New pre-order request for: Turon (Qty: 2).', 1, '2025-03-13 13:25:35'),
+(9, 1, 1, 'New pre-order request for: bibingkaa (Qty: 1).', 1, '2025-03-13 13:38:00'),
+(10, 1, 1, 'New pre-order request for: Turon (Qty: 1).', 1, '2025-03-13 13:55:56'),
+(11, 23, 1, 'New pre-order request for: Turon (Qty: 20).', 1, '2025-03-13 19:11:46'),
+(12, 1, 1, 'New order #119 has been placed!', 1, '2025-05-11 10:39:20'),
+(13, 1, 1, 'New order #121 has been placed!', 1, '2025-05-11 10:41:27'),
+(14, 1, 1, 'New order #122 has been placed!', 1, '2025-05-14 06:46:23');
 
 -- --------------------------------------------------------
 
@@ -494,12 +504,18 @@ INSERT INTO `orders` (`order_id`, `user_id`, `payment_method`, `payment_proof`, 
 (110, 1, '', NULL, 28.00, '2025-03-26 05:48:31', 'Delivered', 0, NULL, NULL),
 (111, 1, 'cash', NULL, 10.00, '2025-03-26 08:13:10', 'Pending', 0, NULL, NULL),
 (112, 1, 'cash', NULL, 28.00, '2025-04-11 11:05:53', 'Delivered', 0, NULL, NULL),
-(113, 1, 'cash', NULL, 20.00, '2025-04-11 11:06:08', 'Pending', 0, NULL, NULL),
-(114, 1, 'cash', NULL, 20.00, '2025-04-11 11:06:32', 'Pending', 0, NULL, NULL),
-(115, 1, 'cash', NULL, 15.00, '2025-04-11 11:08:33', 'Pending', 0, NULL, NULL),
-(116, 1, 'cash', NULL, 20.00, '2025-04-11 11:13:04', 'Pending', 0, NULL, NULL),
-(117, 1, 'cash', NULL, 195.00, '2025-04-11 11:16:06', 'Pending', 0, NULL, NULL),
-(118, 12, 'cash', NULL, 353.00, '2025-04-25 21:29:33', 'Pending', 0, NULL, NULL);
+(113, 1, 'cash', NULL, 20.00, '2025-04-11 11:06:08', 'Delivered', 0, NULL, NULL),
+(114, 1, 'cash', NULL, 20.00, '2025-04-11 11:06:32', 'Delivered', 0, NULL, NULL),
+(115, 1, 'cash', NULL, 15.00, '2025-04-11 11:08:33', 'Delivered', 0, NULL, NULL),
+(116, 1, 'cash', NULL, 20.00, '2025-04-11 11:13:04', 'Delivered', 0, NULL, NULL),
+(117, 1, 'cash', NULL, 195.00, '2025-04-11 11:16:06', 'Delivered', 0, NULL, NULL),
+(118, 12, 'cash', NULL, 353.00, '2025-04-25 21:29:33', 'Pending', 0, NULL, NULL),
+(119, 1, 'cash', NULL, 200.00, '2025-05-11 10:39:20', 'Pending', 0, NULL, NULL),
+(120, 1, 'cash', NULL, 180.00, '2025-05-11 10:40:36', 'Pending', 0, NULL, NULL),
+(121, 1, 'cash', NULL, 100.00, '2025-05-11 10:41:27', 'Pending', 0, NULL, NULL),
+(122, 1, 'cash', NULL, 10.00, '2025-05-14 06:46:23', 'Pending', 0, NULL, NULL),
+(123, 1, 'cash', NULL, 25.00, '2025-05-17 01:28:45', 'Pending', 0, NULL, NULL),
+(124, 23, 'cash', NULL, 25.00, '2025-05-17 01:30:46', 'Pending', 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -611,7 +627,13 @@ INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `ingredien
 (164, 117, NULL, NULL, 1, 15.00, NULL, NULL, 2),
 (165, 118, NULL, 1, 6, 168.00, NULL, NULL, NULL),
 (166, 118, NULL, NULL, 4, 80.00, NULL, NULL, 1),
-(167, 118, NULL, NULL, 7, 105.00, NULL, NULL, 2);
+(167, 118, NULL, NULL, 7, 105.00, NULL, NULL, 2),
+(168, 119, 34, NULL, 4, 200.00, NULL, NULL, NULL),
+(169, 120, NULL, 2, 1, 180.00, NULL, NULL, NULL),
+(170, 121, 34, NULL, 2, 100.00, NULL, NULL, NULL),
+(171, 122, 31, NULL, 1, 10.00, NULL, NULL, NULL),
+(172, 123, NULL, 18, 1, 25.00, NULL, NULL, NULL),
+(173, 124, NULL, 18, 1, 25.00, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -636,9 +658,9 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `seller_id`, `Product_name`, `description`, `price`, `quantity`, `created_at`, `category_id`, `image_url`) VALUES
-(31, 1, 'bibingkaa', 'lami', 10.00, 0, '2024-12-07 22:05:11', 8, '../uploads/images (6).jpg'),
+(31, 1, 'bibingkaa', 'lami', 10.00, 4, '2024-12-07 22:05:11', 8, '../uploads/images (6).jpg'),
 (33, 1, 'Turon', 'asd', 10.00, 2, '2024-12-17 08:02:54', 3, '../uploads/images (7).jpg'),
-(34, 1, 'Ube Cheese Turon', 'Delicious Ube Turon with cheese', 50.00, 461, '2025-02-09 23:01:20', 1, '../uploads/images (8).jpg'),
+(34, 1, 'Ube Cheese Turon', 'Delicious Ube Turon with cheese', 50.00, 455, '2025-02-09 23:01:20', 1, '../uploads/images (8).jpg'),
 (38, 20, 'Ube Cheese Turon', 'Delicious Ube Turon with cheese', 10.00, 1920, '2025-02-13 04:38:19', 1, 'uploads/2612b0bf-7b20-487b-a924-d2171c3f9565.jpg');
 
 -- --------------------------------------------------------
@@ -752,7 +774,8 @@ CREATE TABLE `recipes` (
 --
 
 INSERT INTO `recipes` (`recipe_id`, `user_id`, `title`, `servings`, `prep_time`, `cook_time`, `ingredients`, `directions`, `notes`, `recipe_image`, `created_at`, `updated_at`) VALUES
-(3, 1, 'Bibingka', '8', '10 minutes', '35 minutes', '426.67 g rice flour,\r\n266.67 g granulated sugar,\r\n602.67 g coconut milk,\r\n162.67 g fresh milk,\r\n56.67 g grated coconut,\r\n150.67 g grated cheese,\r\n8 tablespoons butter,\r\n8 pieces raw eggs,\r\n2.67 pieces salted duck egg, sliced,\r\n6.67 teaspoons baking powder,\r\n0.35 teaspoon salt,\r\nPre-cut banana leaf (for lining)', 'Preheat oven to 375 degrees Fahrenheit.\r\nCombine rice flour, baking powder, and salt then mix well. Set aside.\r\nCream butter then gradually put-in sugar while whisking.\r\nAdd the eggs then whisk until every ingredient is well incorporated.\r\nGradually add the rice flour, salt, and baking powder mixture then continue mixing.\r\nPour-in coconut milk and fresh milk then whisk some more for 1 to 2 minutes.\r\nArrange the pre-cut banana leaf on a cake pan or baking pan.\r\nPour the mixture on the pan.\r\nBake for 15 minutes.\r\nRemove from the oven then top with sliced salted egg and grated cheese (do not turn the oven off).\r\nPut back in the oven and bake for 15 to 20 minutes or until the color of the top turn medium brown.\r\nRemove from the oven and let cool.\r\nBrush with butter and top with grated coconut.\r\nServe. Share and enjoy!', '📝 Preheating: Traditionally, bibingka is cooked using charcoal above and below the pan. If using an oven, preheat to 375°F (190°C) and line your baking pan with banana leaves for aroma and authenticity.\r\n🍃 Banana Leaves: To make them pliable and aromatic, lightly heat the banana leaves over an open flame or dip in hot water before lining your pan.\r\n🧂 Salted Eggs & Cheese: These toppings add a savory contrast to the sweet rice cake. You can adjust the amount based on taste preference or omit if unavailable.\r\n🥥 Grated Coconut: Freshly grated coconut is best, but frozen grated coconut is a good alternative. It adds richness and texture on top.\r\n🧈 Butter vs. Margarine: Butter gives a richer flavor, but you can use margarine if that’s what you have on hand.\r\n🔁 Texture Tip: For a lighter bibingka, you may separate the eggs and whip the egg whites to soft peaks before folding into the batter.\r\n🎉 Serving Suggestion: Best served warm, topped with more butter, sugar, grated coconut, or even a sprinkle of brown sugar', '../uploads/recipes/1742629587_images (6).jpg', '2025-03-22 15:46:27', '2025-03-22 15:46:27');
+(3, 1, 'Bibingka', '8', '10 minutes', '35 minutes', '426.67 g rice flour,\r\n266.67 g granulated sugar,\r\n602.67 g coconut milk,\r\n162.67 g fresh milk,\r\n56.67 g grated coconut,\r\n150.67 g grated cheese,\r\n8 tablespoons butter,\r\n8 pieces raw eggs,\r\n2.67 pieces salted duck egg, sliced,\r\n6.67 teaspoons baking powder,\r\n0.35 teaspoon salt,\r\nPre-cut banana leaf (for lining)', 'Preheat oven to 375 degrees Fahrenheit.\r\nCombine rice flour, baking powder, and salt then mix well. Set aside.\r\nCream butter then gradually put-in sugar while whisking.\r\nAdd the eggs then whisk until every ingredient is well incorporated.\r\nGradually add the rice flour, salt, and baking powder mixture then continue mixing.\r\nPour-in coconut milk and fresh milk then whisk some more for 1 to 2 minutes.\r\nArrange the pre-cut banana leaf on a cake pan or baking pan.\r\nPour the mixture on the pan.\r\nBake for 15 minutes.\r\nRemove from the oven then top with sliced salted egg and grated cheese (do not turn the oven off).\r\nPut back in the oven and bake for 15 to 20 minutes or until the color of the top turn medium brown.\r\nRemove from the oven and let cool.\r\nBrush with butter and top with grated coconut.\r\nServe. Share and enjoy!', '📝 Preheating: Traditionally, bibingka is cooked using charcoal above and below the pan. If using an oven, preheat to 375°F (190°C) and line your baking pan with banana leaves for aroma and authenticity.\r\n🍃 Banana Leaves: To make them pliable and aromatic, lightly heat the banana leaves over an open flame or dip in hot water before lining your pan.\r\n🧂 Salted Eggs & Cheese: These toppings add a savory contrast to the sweet rice cake. You can adjust the amount based on taste preference or omit if unavailable.\r\n🥥 Grated Coconut: Freshly grated coconut is best, but frozen grated coconut is a good alternative. It adds richness and texture on top.\r\n🧈 Butter vs. Margarine: Butter gives a richer flavor, but you can use margarine if that’s what you have on hand.\r\n🔁 Texture Tip: For a lighter bibingka, you may separate the eggs and whip the egg whites to soft peaks before folding into the batter.\r\n🎉 Serving Suggestion: Best served warm, topped with more butter, sugar, grated coconut, or even a sprinkle of brown sugar', '../uploads/recipes/1742629587_images (6).jpg', '2025-03-22 15:46:27', '2025-03-22 15:46:27'),
+(5, 1, 'asd', 'asd', '11', '1', '11', '11', '11', '../uploads/recipes/1747205083_f2678c157ca3b7e20968ce5fb4a96ba3.jpg', '2025-05-14 14:44:43', '2025-05-14 14:44:43');
 
 -- --------------------------------------------------------
 
@@ -875,7 +898,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `middle_name`, `last_name`, `date_of_birth`, `contact_number`, `country`, `city`, `streetname`, `barangay`, `province`, `email`, `password`, `usertype`, `profile_pics`) VALUES
-(1, 'Aaron Jhon', '', 'Gutang', '2025-03-07', '09294999087', 'Philippines', 'asd', 'asd', 'asd', 'asd', 'gutang@gmail.com', '123456', 'seller', '../uploads/IMG20250215175103.jpg'),
+(1, 'Aaron Jhon', '', 'Gutang', '2025-05-17', '09294999087', 'Philippines', 'asd', 'asd', 'asd', 'asd', 'gutang@gmail.com', '123456', 'seller', '../uploads/IMG20250215175103.jpg'),
 (12, 'Darlyn', 'L', 'Hoshino', '2025-03-14', '123123123', 'Philippines', 'Davao', 'Upperpiedad', 'Bato', 'Toril', 'a@gmail.com', 'Asd123', 'supplier', '../uploads/5cc09ad47b7c1c180db37126c30ac6dc.jpg'),
 (13, 'lisa', '', 'yahh', '2024-12-19', '1211212121', NULL, NULL, NULL, NULL, NULL, 'lisa@gmail.com', 'Lisa123', 'user', NULL),
 (14, 'arnel', '', 'gutang', '2025-01-11', '123123123', NULL, NULL, NULL, NULL, NULL, 'arnel@gmail.com', 'Arnel123', 'seller', NULL),
@@ -963,7 +986,8 @@ ALTER TABLE `ingredients_inventory`
   ADD KEY `ingredient_id` (`ingredient_id`),
   ADD KEY `seller_id` (`seller_id`),
   ADD KEY `supplier_id` (`supplier_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `variant_id` (`variant_id`);
 
 --
 -- Indexes for table `ingredient_variants`
@@ -1138,7 +1162,7 @@ ALTER TABLE `business_hours`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `cart_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -1174,25 +1198,25 @@ ALTER TABLE `ingredient_variants`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=174;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -1234,7 +1258,7 @@ ALTER TABLE `receipt_items`
 -- AUTO_INCREMENT for table `recipes`
 --
 ALTER TABLE `recipes`
-  MODIFY `recipe_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `recipe_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `rejections`
@@ -1305,7 +1329,8 @@ ALTER TABLE `ingredients_inventory`
   ADD CONSTRAINT `ingredients_inventory_ibfk_1` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`ingredient_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ingredients_inventory_ibfk_2` FOREIGN KEY (`seller_id`) REFERENCES `apply_seller` (`seller_id`) ON DELETE SET NULL,
   ADD CONSTRAINT `ingredients_inventory_ibfk_3` FOREIGN KEY (`supplier_id`) REFERENCES `apply_supplier` (`supplier_id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `ingredients_inventory_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+  ADD CONSTRAINT `ingredients_inventory_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `ingredients_inventory_ibfk_5` FOREIGN KEY (`variant_id`) REFERENCES `ingredient_variants` (`variant_id`);
 
 --
 -- Constraints for table `ingredient_variants`

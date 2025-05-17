@@ -1,80 +1,198 @@
-/* Positioning the button in the bottom right */
+/* Floating Recipe Panel Styles */
+:root {
+    --primary-color: #6c5ce7;
+    --primary-hover: #5649c0;
+    --text-color: #2d3436;
+    --bg-color: #ffffff;
+    --border-color: #dfe6e9;
+    --hover-color: #f8f9fa;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Floating Action Button */
 .circle-btn {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
-    background-color: darkviolet;
+    background-color: var(--primary-color);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px var(--shadow-color);
     font-size: 24px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
 }
 
 .circle-btn:hover {
-    background-color: pink;
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-color);
 }
 
-/* Styling the offcanvas */
-.offcanvas-body {
-    font-family: Arial, sans-serif;
-    font-size: 14px;
+.circle-btn:active {
+    transform: translateY(0);
 }
 
-.offcanvas-header {
-    background-color: darkviolet;
+/* Scope all styles to .recipe-offcanvas */
+.recipe-offcanvas {
+    border-left: 1px solid var(--border-color);
+}
+
+.recipe-offcanvas-header {
+    background-color: var(--primary-color);
     color: white;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.offcanvas-title {
-    font-weight: bold;
+.recipe-offcanvas-title {
+    font-weight: 600;
+    font-size: 1.25rem;
     color: white;
+    margin: 0;
 }
 
-.close-recipe {
-    font-size: 14px;
-    color: red;
+.recipe-offcanvas .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.recipe-offcanvas .btn-close:hover {
+    opacity: 1;
+}
+
+.recipe-offcanvas .offcanvas-body {
+    padding: 1.5rem;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.recipe-offcanvas #recipe-list {
+    margin-top: 1rem;
+}
+
+.recipe-offcanvas .recipe-item {
     cursor: pointer;
-    margin-left: 10px;
-    font-weight: bold;
+    margin: 0.75rem 0;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--bg-color);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.close-recipe:hover {
-    text-decoration: underline;
+.recipe-offcanvas .recipe-item:hover {
+    background-color: var(--hover-color);
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px var(--shadow-color);
 }
 
-/* Styling Recipe List */
-.recipe-item {
+.recipe-offcanvas .recipe-item h6 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.recipe-offcanvas .close-recipe {
+    font-size: 0.875rem;
+    color: #e74c3c;
     cursor: pointer;
-    margin: 10px 0;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    opacity: 0.7;
 }
 
-.recipe-item:hover {
-    background-color: #e0e0e0;
+.recipe-offcanvas .close-recipe:hover {
+    opacity: 1;
+    background-color: rgba(231, 76, 60, 0.1);
 }
 
-/* Styling Ingredients inside Collapse */
-.collapse ul {
-    padding-left: 20px;
+.recipe-offcanvas .collapse {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: var(--hover-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
 }
 
-.collapse li {
-    list-style-type: disc;
-    margin: 5px 0;
+.recipe-offcanvas .collapse h6 {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.collapse h6 {
+.recipe-offcanvas .collapse ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recipe-offcanvas .collapse li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+}
+
+.recipe-offcanvas .collapse li:last-child {
+    border-bottom: none;
+}
+
+.recipe-offcanvas .collapse li::before {
+    content: "•";
+    color: var(--primary-color);
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-right: 0.5rem;
+}
+
+.recipe-offcanvas .offcanvas-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.recipe-offcanvas .offcanvas-body::-webkit-scrollbar-track {
+    background: var(--hover-color);
+}
+
+.recipe-offcanvas .offcanvas-body::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 4px;
+}
+
+.recipe-offcanvas .offcanvas-body::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-hover);
+}
+
+@media (max-width: 576px) {
+    .circle-btn {
+        width: 55px;
+        height: 55px;
+        bottom: 20px;
+        right: 20px;
+    }
+    .recipe-offcanvas .offcanvas-body {
+        padding: 1rem;
+    }
+    .recipe-offcanvas .recipe-item {
+        padding: 0.75rem;
+    }
 }
 

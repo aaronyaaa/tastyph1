@@ -1,3 +1,22 @@
+<?php
+// Add this at the top of the file, after any existing includes
+function getCategories($conn) {
+    $categories = array();
+    $sql = "SELECT category_id, name FROM categories ORDER BY name ASC";
+    $result = $conn->query($sql);
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $categories[] = $row;
+        }
+    }
+    return $categories;
+}
+
+// Get categories once for both modals
+$categories = getCategories($conn);
+?>
+
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -163,20 +182,12 @@
                     <div class="mb-3">
                         <label class="form-label">Category</label>
                         <select class="form-select" name="category_id" required>
-                            <?php
-                            $conn = new mysqli('localhost', 'root', '', 'tastyph1');
-                            $sql = "SELECT category_id, name FROM categories";
-                            $result = $conn->query($sql);
-
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    echo "<option value='" . $row['category_id'] . "'>" . $row['name'] . "</option>";
-                                }
-                            } else {
-                                echo "<option value=''>No categories available</option>";
-                            }
-                            $conn->close();
-                            ?>
+                            <option value="">Select a category</option>
+                            <?php foreach ($categories as $category): ?>
+                                <option value="<?= htmlspecialchars($category['category_id']); ?>">
+                                    <?= htmlspecialchars($category['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
@@ -257,20 +268,12 @@
                     <div class="mb-3">
                         <label class="form-label">Category</label>
                         <select class="form-select" id="editIngredientCategory" name="category_id" required>
-                            <?php
-                            $conn = new mysqli('localhost', 'root', '', 'tastyph1');
-                            $sql = "SELECT category_id, name FROM categories";
-                            $result = $conn->query($sql);
-
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    echo "<option value='" . $row['category_id'] . "'>" . $row['name'] . "</option>";
-                                }
-                            } else {
-                                echo "<option value=''>No categories available</option>";
-                            }
-                            $conn->close();
-                            ?>
+                            <option value="">Select a category</option>
+                            <?php foreach ($categories as $category): ?>
+                                <option value="<?= htmlspecialchars($category['category_id']); ?>">
+                                    <?= htmlspecialchars($category['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 

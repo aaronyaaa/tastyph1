@@ -42,11 +42,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Insert the ingredient into the database
-    $sql = "INSERT INTO ingredients (supplier_id, ingredient_name, description, price, quantity, quantity_value, unit_type, created_at, category_id, image_url) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
+    $conn->begin_transaction();
+    
+    try {
+        // First insert into ingredients table
+        $sql = "INSERT INTO ingredients (supplier_id, ingredient_name, description, price, quantity, quantity_value, unit_type, created_at, category_id, image_url) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
 
-    if ($stmt = $conn->prepare($sql)) {
-        // Bind the parameters (9 placeholders = 9 variables)
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Error preparing ingredient insert: " . $conn->error);
+        }
+
         $stmt->bind_param("issdiisss", 
             $supplierId, 
             $ingredientName, 
@@ -59,15 +66,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $imageUrl
         );
 
-        // Execute the statement
-        if ($stmt->execute()) {
-            echo "<script>alert('Ingredient added successfully!'); window.location.href='../includes/manage_ingredient.php';</script>";
-        } else {
-            echo "<script>alert('Error: " . $stmt->error . "'); window.history.back();</script>";
+        if (!$stmt->execute()) {
+            throw new Exception("Error inserting ingredient: " . $stmt->error);
         }
+        
+        $ingredientId = $conn->insert_id;
         $stmt->close();
-    } else {
-        echo "<script>alert('Error preparing statement: " . $conn->error . "'); window.history.back();</script>";
+
+        // Then create inventory record
+        $inventorySql = "INSERT INTO ingredients_inventory 
+                        (ingredient_id, ingredient_name, description, quantity, quantity_value, unit_type, price, supplier_id, user_id) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $inventoryStmt = $conn->prepare($inventorySql);
+        if (!$inventoryStmt) {
+            throw new Exception("Error preparing inventory insert: " . $conn->error);
+        }
+
+        $inventoryStmt->bind_param("issiiidsi", 
+            $ingredientId,
+            $ingredientName,
+            $description,
+            $stockQuantity,
+            $measurementValue,
+            $unitType,
+            $price,
+            $supplierId,
+            $supplierId  // user_id is same as supplier_id for supplier's own inventory
+        );
+
+        if (!$inventoryStmt->execute()) {
+            throw new Exception("Error inserting inventory: " . $inventoryStmt->error);
+        }
+        
+        $inventoryStmt->close();
+        
+        // Commit transaction
+        $conn->commit();
+        echo "<script>alert('Ingredient added successfully!'); window.location.href='../includes/manage_ingredient.php';</script>";
+        
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        echo "<script>alert('Error: " . $e->getMessage() . "'); window.history.back();</script>";
     }
 
     $conn->close();

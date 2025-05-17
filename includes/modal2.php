@@ -400,169 +400,534 @@
 <div class="modal fade" id="addRecipeModal" tabindex="-1" aria-labelledby="addRecipeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form action="../helpers/save_recipe.php" method="POST" enctype="multipart/form-data">
-        
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addRecipeModalLabel">Add New Recipe</h5>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addRecipeModalLabel">
+                        <i class="fas fa-utensils me-2"></i>Add New Recipe
+                    </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
           <div class="mb-3">
             <label for="title" class="form-label">Recipe Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-heading"></i></span>
             <input type="text" class="form-control" name="title" required>
+                        </div>
           </div>
 
           <div class="row mb-3">
-            <div class="col">
+                        <div class="col-md-4">
               <label for="servings" class="form-label">Servings</label>
-              <input type="text" class="form-control" name="servings">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                <input type="text" class="form-control" name="servings" placeholder="e.g., 4 servings">
+                            </div>
             </div>
-            <div class="col">
+                        <div class="col-md-4">
               <label for="prep_time" class="form-label">Prep Time</label>
-              <input type="text" class="form-control" name="prep_time">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                <input type="text" class="form-control" name="prep_time" placeholder="e.g., 30 mins">
+                            </div>
             </div>
-            <div class="col">
+                        <div class="col-md-4">
               <label for="cook_time" class="form-label">Cook Time</label>
-              <input type="text" class="form-control" name="cook_time">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-fire"></i></span>
+                                <input type="text" class="form-control" name="cook_time" placeholder="e.g., 1 hour">
+                            </div>
             </div>
           </div>
 
           <div class="mb-3">
-            <label for="ingredients" class="form-label">Ingredients (separate by comma)</label>
-            <textarea class="form-control" name="ingredients" rows="3" required></textarea>
+                        <label for="ingredients" class="form-label">Ingredients</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-list-ul"></i></span>
+                            <textarea class="form-control" name="ingredients" rows="3" required 
+                                    placeholder="Enter ingredients, separated by commas (e.g., 2 cups flour, 1 cup sugar)"></textarea>
+                        </div>
+                        <small class="text-muted">Separate ingredients with commas</small>
           </div>
 
           <div class="mb-3">
             <label for="directions" class="form-label">Directions</label>
-            <textarea class="form-control" name="directions" rows="5" required></textarea>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-utensils"></i></span>
+                            <textarea class="form-control" name="directions" rows="5" required 
+                                    placeholder="Enter step-by-step cooking instructions"></textarea>
+                        </div>
           </div>
 
           <div class="mb-3">
             <label for="notes" class="form-label">Notes</label>
-            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
+                            <textarea class="form-control" name="notes" rows="2" 
+                                    placeholder="Optional: Add any additional notes or tips"></textarea>
+                        </div>
           </div>
 
           <div class="mb-3">
             <label for="recipe_image" class="form-label">Recipe Image</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-image"></i></span>
             <input type="file" class="form-control" name="recipe_image" accept="image/*">
+                        </div>
+                        <div id="recipeImagePreview" class="mt-2" style="display: none;">
+                            <img src="" alt="Recipe Preview" class="img-thumbnail" style="max-height: 200px;">
+                        </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Save Recipe</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Save Recipe
+                    </button>
         </div>
       </div>
     </form>
   </div>
 </div>
 
+<!-- Recipe Modals -->
+<?php if (isset($recipes) && !empty($recipes)): ?>
+    <?php foreach ($recipes as $recipe): ?>
 <!-- View Recipe Modal -->
-<div class="modal fade" id="viewRecipeModal<?= $row['recipe_id'] ?>" tabindex="-1" aria-labelledby="viewRecipeModalLabel<?= $row['recipe_id'] ?>" aria-hidden="true">
+        <div class="modal fade" id="viewRecipeModal<?php echo $recipe['recipe_id']; ?>" tabindex="-1" aria-labelledby="viewRecipeModalLabel<?php echo $recipe['recipe_id']; ?>" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-    
-      <div class="modal-header">
-        <h5 class="modal-title" id="viewRecipeModalLabel<?= $row['recipe_id'] ?>"><?= htmlspecialchars($row['title']) ?></h5>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="viewRecipeModalLabel<?php echo $recipe['recipe_id']; ?>">
+                            <i class="fas fa-utensils me-2"></i><?php echo htmlspecialchars($recipe['title']); ?>
+                        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <?php if (!empty($row['recipe_image'])): ?>
-          <img src="<?= htmlspecialchars($row['recipe_image']) ?>" alt="Recipe Image" class="img-fluid rounded mb-3">
+                        <?php if (!empty($recipe['recipe_image'])): ?>
+                            <img src="<?php echo htmlspecialchars($recipe['recipe_image']); ?>" 
+                                 alt="Recipe Image" 
+                                 class="img-fluid rounded mb-3" 
+                                 style="max-height: 300px; width: 100%; object-fit: cover;">
         <?php endif; ?>
 
-        <p><strong>Servings:</strong> <?= htmlspecialchars($row['servings']) ?: 'N/A' ?></p>
-        <p><strong>Prep Time:</strong> <?= htmlspecialchars($row['prep_time']) ?: 'N/A' ?></p>
-        <p><strong>Cook Time:</strong> <?= htmlspecialchars($row['cook_time']) ?: 'N/A' ?></p>
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-users mb-2"></i>
+                                        <h6 class="card-title">Servings</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['servings']) ?: 'N/A'; ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-clock mb-2"></i>
+                                        <h6 class="card-title">Prep Time</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['prep_time']) ?: 'N/A'; ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-fire mb-2"></i>
+                                        <h6 class="card-title">Cook Time</h6>
+                                        <p class="card-text"><?php echo htmlspecialchars($recipe['cook_time']) ?: 'N/A'; ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <h6>Ingredients:</h6>
-        <ul>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-list-ul me-2"></i>Ingredients</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <ul class="list-group list-group-flush">
           <?php
-            $ingredients = explode(',', $row['ingredients']);
+                                            $ingredients = explode(',', $recipe['ingredients']);
             foreach ($ingredients as $ingredient):
+                                                $ingredient = trim($ingredient);
+                                                if (!empty($ingredient)):
           ?>
-            <li><?= htmlspecialchars(trim($ingredient)) ?></li>
-          <?php endforeach; ?>
+                                                <li class="list-group-item">
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <?php echo htmlspecialchars($ingredient); ?>
+                                                </li>
+                                            <?php 
+                                                endif;
+                                            endforeach; 
+                                            ?>
         </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-utensils me-2"></i>Directions</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text"><?php echo nl2br(htmlspecialchars($recipe['directions'])); ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <h6>Directions:</h6>
-        <p><?= nl2br(htmlspecialchars($row['directions'])) ?></p>
-
-        <?php if (!empty($row['notes'])): ?>
-          <h6>Notes:</h6>
-          <p><?= nl2br(htmlspecialchars($row['notes'])) ?></p>
+                        <?php if (!empty($recipe['notes'])): ?>
+                            <div class="card mt-3">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Notes</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><?php echo nl2br(htmlspecialchars($recipe['notes'])); ?></p>
+                                </div>
+                            </div>
         <?php endif; ?>
       </div>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-warning" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#editRecipeModal<?php echo $recipe['recipe_id']; ?>">
+                            <i class="fas fa-edit me-2"></i>Edit Recipe
+                        </button>
       </div>
-
     </div>
   </div>
 </div>
 
-
 <!-- Edit Recipe Modal -->
-<div class="modal fade" id="editRecipeModal<?= $row['recipe_id'] ?>" tabindex="-1" aria-labelledby="editRecipeModalLabel<?= $row['recipe_id'] ?>" aria-hidden="true">
+        <div class="modal fade" id="editRecipeModal<?php echo $recipe['recipe_id']; ?>" tabindex="-1" aria-labelledby="editRecipeModalLabel<?php echo $recipe['recipe_id']; ?>" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <form method="POST" action="../helpers/edit_recipe.php" enctype="multipart/form-data">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="editRecipeModalLabel<?= $row['recipe_id'] ?>">Edit Recipe: <?= htmlspecialchars($row['title']) ?></h5>
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title" id="editRecipeModalLabel<?php echo $recipe['recipe_id']; ?>">
+                                <i class="fas fa-edit me-2"></i>Edit Recipe: <?php echo htmlspecialchars($recipe['title']); ?>
+                            </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
-          <input type="hidden" name="recipe_id" value="<?= $row['recipe_id'] ?>">
+                            <input type="hidden" name="recipe_id" value="<?php echo $recipe['recipe_id']; ?>">
 
           <div class="mb-3">
             <label class="form-label">Title</label>
-            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($row['title']) ?>" required>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                    <input type="text" name="title" class="form-control" value="<?php echo htmlspecialchars($recipe['title']); ?>" required>
+                                </div>
           </div>
 
           <div class="row mb-3">
-            <div class="col">
-              <label>Servings</label>
-              <input type="text" name="servings" class="form-control" value="<?= htmlspecialchars($row['servings']) ?>">
+                                <div class="col-md-4">
+                                    <label class="form-label">Servings</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                        <input type="text" name="servings" class="form-control" value="<?php echo htmlspecialchars($recipe['servings']); ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Prep Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                                        <input type="text" name="prep_time" class="form-control" value="<?php echo htmlspecialchars($recipe['prep_time']); ?>">
+                                    </div>
             </div>
-            <div class="col">
-              <label>Prep Time</label>
-              <input type="text" name="prep_time" class="form-control" value="<?= htmlspecialchars($row['prep_time']) ?>">
+                                <div class="col-md-4">
+                                    <label class="form-label">Cook Time</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-fire"></i></span>
+                                        <input type="text" name="cook_time" class="form-control" value="<?php echo htmlspecialchars($recipe['cook_time']); ?>">
             </div>
-            <div class="col">
-              <label>Cook Time</label>
-              <input type="text" name="cook_time" class="form-control" value="<?= htmlspecialchars($row['cook_time']) ?>">
             </div>
           </div>
 
           <div class="mb-3">
-            <label>Ingredients (comma-separated)</label>
-            <textarea name="ingredients" class="form-control" required><?= htmlspecialchars($row['ingredients']) ?></textarea>
+                                <label class="form-label">Ingredients</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-list-ul"></i></span>
+                                    <textarea name="ingredients" class="form-control" rows="3" required><?php echo htmlspecialchars($recipe['ingredients']); ?></textarea>
+                                </div>
+                                <small class="text-muted">Separate ingredients with commas</small>
           </div>
 
           <div class="mb-3">
-            <label>Directions</label>
-            <textarea name="directions" class="form-control" required><?= htmlspecialchars($row['directions']) ?></textarea>
+                                <label class="form-label">Directions</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-utensils"></i></span>
+                                    <textarea name="directions" class="form-control" rows="5" required><?php echo htmlspecialchars($recipe['directions']); ?></textarea>
+                                </div>
           </div>
 
           <div class="mb-3">
-            <label>Notes</label>
-            <textarea name="notes" class="form-control"><?= htmlspecialchars($row['notes']) ?></textarea>
+                                <label class="form-label">Notes</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-sticky-note"></i></span>
+                                    <textarea name="notes" class="form-control" rows="3"><?php echo htmlspecialchars($recipe['notes']); ?></textarea>
+                                </div>
           </div>
 
           <div class="mb-3">
-            <label>Change Image (optional)</label>
-            <input type="file" name="recipe_image" class="form-control">
+                                <label class="form-label">Change Image (optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                    <input type="file" name="recipe_image" class="form-control" accept="image/*">
+                                </div>
+                                <?php if (!empty($recipe['recipe_image'])): ?>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Current image:</small>
+                                        <img src="<?php echo htmlspecialchars($recipe['recipe_image']); ?>" 
+                                             alt="Current Recipe Image" 
+                                             class="img-thumbnail mt-1" 
+                                             style="max-height: 100px;">
+                                    </div>
+                                <?php endif; ?>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Save Changes</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
         </div>
       </div>
     </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addCategoryModalLabel">
+                    <i class="fas fa-tags me-2"></i>Add New Category
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="../helpers/add_category.php" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Category Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <input type="text" class="form-control" id="categoryName" name="category_name" required 
+                                   placeholder="Enter category name">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Category List Modal -->
+<div class="modal fade" id="categoryListModal" tabindex="-1" aria-labelledby="categoryListModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="categoryListModalLabel">
+                    <i class="fas fa-list me-2"></i>Categories
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <?php
+                    $categoriesQuery = "SELECT category_id, name FROM categories ORDER BY name";
+                    $categoriesResult = $conn->query($categoriesQuery);
+                    if ($categoriesResult && $categoriesResult->num_rows > 0) {
+                        while ($category = $categoriesResult->fetch_assoc()) {
+                            echo '<div class="list-group-item d-flex justify-content-between align-items-center">';
+                            echo '<span>' . htmlspecialchars($category['name']) . '</span>';
+                            echo '<div class="btn-group">';
+                            echo '<button type="button" class="btn btn-sm btn-warning edit-category" 
+                                    data-id="' . $category['category_id'] . '" 
+                                    data-name="' . htmlspecialchars($category['name']) . '"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editCategoryModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>';
+                            echo '<button type="button" class="btn btn-sm btn-danger delete-category" 
+                                    data-id="' . $category['category_id'] . '">
+                                    <i class="fas fa-trash"></i>
+                                </button>';
+                            echo '</div>';
+                            echo '</div>';
+                        }
+                    } else {
+                        echo '<div class="list-group-item text-center text-muted">No categories found</div>';
+                    }
+                    ?>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <i class="fas fa-plus me-2"></i>Add New Category
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Add Ingredient Modal -->
+<div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addIngredientModalLabel">
+                    <i class="fas fa-plus me-2"></i>Add New Ingredient
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="../helpers/add_ingredient.php" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ingredientName" class="form-label">Ingredient Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-box"></i></span>
+                            <input type="text" class="form-control" id="ingredientName" name="ingredient_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                            <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="quantity" class="form-label">Quantity</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                                <input type="number" class="form-control" id="quantity" name="quantity" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="unitType" class="form-label">Unit Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-ruler"></i></span>
+                                <select class="form-select" id="unitType" name="unit_type" required>
+                                    <option value="">Select unit</option>
+                                    <option value="kg">Kilogram (kg)</option>
+                                    <option value="g">Gram (g)</option>
+                                    <option value="l">Liter (L)</option>
+                                    <option value="ml">Milliliter (ml)</option>
+                                    <option value="pcs">Pieces (pcs)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-2"></i>Save Ingredient
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Ingredient Modal -->
+<div class="modal fade" id="editIngredientModal" tabindex="-1" aria-labelledby="editIngredientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title" id="editIngredientModalLabel">
+                    <i class="fas fa-edit me-2"></i>Edit Ingredient
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="../helpers/edit_ingredient.php" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="editIngredientId" name="ingredient_id">
+                    <div class="mb-3">
+                        <label for="editIngredientName" class="form-label">Ingredient Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-box"></i></span>
+                            <input type="text" class="form-control" id="editIngredientName" name="ingredient_name" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Description</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                            <textarea class="form-control" id="editDescription" name="description" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editQuantity" class="form-label">Quantity</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                                <input type="number" class="form-control" id="editQuantity" name="quantity" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editUnitType" class="form-label">Unit Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-ruler"></i></span>
+                                <select class="form-select" id="editUnitType" name="unit_type" required>
+                                    <option value="">Select unit</option>
+                                    <option value="kg">Kilogram (kg)</option>
+                                    <option value="g">Gram (g)</option>
+                                    <option value="l">Liter (L)</option>
+                                    <option value="ml">Milliliter (ml)</option>
+                                    <option value="pcs">Pieces (pcs)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPrice" class="form-label">Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" class="form-control" id="editPrice" name="price" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
   </div>
 </div>
 

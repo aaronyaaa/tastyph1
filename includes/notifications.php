@@ -25,6 +25,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = $notificationManager->markAllAsRead($_SESSION['userId']);
                 echo json_encode(['success' => $success]);
                 break;
+
+            case 'get_receipt':
+                if (isset($_POST['receipt_id'])) {
+                    $receiptId = (int)$_POST['receipt_id'];
+                    
+                    // Get receipt details
+                    $sql = "SELECT r.*, ri.* 
+                           FROM receipts r 
+                           JOIN receipt_items ri ON r.receipt_id = ri.receipt_id 
+                           WHERE r.receipt_id = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $receiptId);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    $receipt = null;
+                    $items = [];
+                    
+                    while ($row = $result->fetch_assoc()) {
+                        if (!$receipt) {
+                            $receipt = [
+                                'receipt_number' => $row['receipt_number'],
+                                'issue_date' => $row['issue_date'],
+                                'total_amount' => $row['total_amount'],
+                                'payment_method' => $row['payment_method'],
+                                'payment_status' => $row['payment_status'],
+                                'buyer_name' => $row['buyer_name'],
+                                'buyer_address' => $row['buyer_address'],
+                                'buyer_contact' => $row['buyer_contact'],
+                                'supplier_name' => $row['supplier_name'],
+                                'supplier_address' => $row['supplier_address'],
+                                'supplier_contact' => $row['supplier_contact'],
+                                'supplier_tin' => $row['supplier_tin']
+                            ];
+                        }
+                        $items[] = [
+                            'item_name' => $row['item_name'],
+                            'quantity' => $row['quantity'],
+                            'unit_price' => $row['unit_price'],
+                            'unit_type' => $row['unit_type'],
+                            'quantity_value' => $row['quantity_value'],
+                            'subtotal' => $row['subtotal']
+                        ];
+                    }
+                    
+                    if ($receipt) {
+                        $receipt['items'] = $items;
+                        echo json_encode(['success' => true, 'receipt' => $receipt]);
+                    } else {
+                        echo json_encode(['success' => false, 'message' => 'Receipt not found']);
+                    }
+                }
+                break;
         }
     }
     exit;
@@ -34,8 +87,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 function getNotificationInfo($message) {
     $type = 'order';
     $title = 'New Notification';
+    $showReceiptButton = false;
+    $receiptId = null;
     
-    if (strpos($message, 'pre-order request') !== false) {
+    if (strpos($message, 'receipt') !== false) {
+        $type = 'receipt';
+        $title = 'Receipt Generated';
+        $showReceiptButton = true;
+        // Extract receipt number from message
+        if (preg_match('/Receipt #([A-Z0-9-]+)/', $message, $matches)) {
+            $receiptNumber = $matches[1];
+            // Get receipt ID from database
+            global $conn;
+            $stmt = $conn->prepare("SELECT receipt_id FROM receipts WHERE receipt_number = ?");
+            $stmt->bind_param("s", $receiptNumber);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $receiptId = $row['receipt_id'];
+            }
+        }
+    } elseif (strpos($message, 'pre-order request') !== false) {
         $type = 'order';
         $title = 'New Pre-order Request';
     } elseif (strpos($message, 'message') !== false) {
@@ -46,7 +118,12 @@ function getNotificationInfo($message) {
         $title = 'System Notification';
     }
     
-    return ['type' => $type, 'title' => $title];
+    return [
+        'type' => $type, 
+        'title' => $title,
+        'showReceiptButton' => $showReceiptButton,
+        'receiptId' => $receiptId
+    ];
 }
 ?>
 
@@ -93,6 +170,7 @@ function getNotificationInfo($message) {
         .type-order { background-color: #28a745; color: white; }
         .type-message { background-color: #17a2b8; color: white; }
         .type-system { background-color: #6c757d; color: white; }
+        .type-receipt { background-color: #6f42c1; color: white; }
         .notification-actions {
             display: flex;
             gap: 0.5rem;
@@ -107,6 +185,42 @@ function getNotificationInfo($message) {
         }
         .pagination {
             margin-top: 2rem;
+        }
+        /* Receipt Modal Styles */
+        .receipt-modal .modal-content {
+            border-radius: 0.5rem;
+        }
+        .receipt-header {
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .receipt-items {
+            margin: 1.5rem 0;
+        }
+        .receipt-items th {
+            background-color: #f8f9fa;
+        }
+        .receipt-total {
+            border-top: 2px solid #dee2e6;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        .receipt-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+            font-size: 0.875rem;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .receipt-modal .modal-content {
+                border: none;
+                box-shadow: none;
+            }
         }
     </style>
 </head>
@@ -126,7 +240,6 @@ function getNotificationInfo($message) {
         <div id="notificationsList">
             <?php if ($notifications->num_rows > 0): ?>
                 <?php while ($notification = $notifications->fetch_assoc()): 
-                    // Get notification type and title based on message content
                     $notificationInfo = getNotificationInfo($notification['message']);
                     $type = $notification['type'] ?? $notificationInfo['type'];
                     $title = $notification['title'] ?? $notificationInfo['title'];
@@ -152,12 +265,20 @@ function getNotificationInfo($message) {
                                     <?= date('M d, Y h:i A', strtotime($notification['created_at'])) ?>
                                 </span>
                             </div>
-                            <?php if ($notification['status'] === 'unread'): ?>
-                                <button class="btn btn-sm btn-outline-primary mark-read" 
-                                        data-notification-id="<?= $notification['notification_id'] ?>">
-                                    <i class="fas fa-check"></i> Mark as Read
-                                </button>
-                            <?php endif; ?>
+                            <div class="notification-actions">
+                                <?php if ($notificationInfo['showReceiptButton'] && $notificationInfo['receiptId']): ?>
+                                    <button class="btn btn-sm btn-primary view-receipt" 
+                                            data-receipt-id="<?= $notificationInfo['receiptId'] ?>">
+                                        <i class="fas fa-receipt"></i> View Receipt
+                                    </button>
+                                <?php endif; ?>
+                                <?php if ($notification['status'] === 'unread'): ?>
+                                    <button class="btn btn-sm btn-outline-primary mark-read" 
+                                            data-notification-id="<?= $notification['notification_id'] ?>">
+                                        <i class="fas fa-check"></i> Mark as Read
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endwhile; ?>
@@ -169,10 +290,80 @@ function getNotificationInfo($message) {
         </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div class="modal fade receipt-modal" id="receiptModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Receipt Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="receipt-header">
+                        <div class="row">
+                            <div class="col-6">
+                                <h4 class="supplier-name mb-2"></h4>
+                                <p class="supplier-address mb-1"></p>
+                                <p class="supplier-contact mb-1"></p>
+                                <p class="supplier-tin mb-0"></p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5 class="receipt-number mb-2"></h5>
+                                <p class="issue-date mb-1"></p>
+                                <p class="payment-method mb-1"></p>
+                                <p class="payment-status mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="buyer-details mb-4">
+                        <h6>Bill To:</h6>
+                        <p class="buyer-name mb-1"></p>
+                        <p class="buyer-address mb-1"></p>
+                        <p class="buyer-contact mb-0"></p>
+                    </div>
+
+                    <div class="receipt-items">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody class="items-list">
+                            </tbody>
+                            <tfoot>
+                                <tr class="receipt-total">
+                                    <td colspan="3" class="text-end">Total Amount:</td>
+                                    <td class="text-end total-amount"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="receipt-footer">
+                        <p class="text-center mb-0">Thank you for your business!</p>
+                    </div>
+                </div>
+                <div class="modal-footer no-print">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
+            const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+
             // Mark single notification as read
             $('.mark-read').click(function() {
                 const button = $(this);
@@ -204,6 +395,52 @@ function getNotificationInfo($message) {
                         $('.mark-read').remove();
                         button.remove();
                         updateNotificationCount();
+                    }
+                });
+            });
+
+            // View receipt
+            $('.view-receipt').click(function() {
+                const receiptId = $(this).data('receipt-id');
+                
+                $.post('notifications.php', {
+                    action: 'get_receipt',
+                    receipt_id: receiptId
+                }, function(response) {
+                    if (response.success) {
+                        const receipt = response.receipt;
+                        
+                        // Update modal content
+                        $('.supplier-name').text(receipt.supplier_name);
+                        $('.supplier-address').text(receipt.supplier_address);
+                        $('.supplier-contact').text(receipt.supplier_contact);
+                        $('.supplier-tin').text('TIN: ' + receipt.supplier_tin);
+                        
+                        $('.receipt-number').text('Receipt #' + receipt.receipt_number);
+                        $('.issue-date').text('Date: ' + new Date(receipt.issue_date).toLocaleDateString());
+                        $('.payment-method').text('Payment Method: ' + receipt.payment_method);
+                        $('.payment-status').text('Status: ' + receipt.payment_status);
+                        
+                        $('.buyer-name').text(receipt.buyer_name);
+                        $('.buyer-address').text(receipt.buyer_address);
+                        $('.buyer-contact').text(receipt.buyer_contact);
+                        
+                        // Clear and populate items
+                        $('.items-list').empty();
+                        receipt.items.forEach(item => {
+                            $('.items-list').append(`
+                                <tr>
+                                    <td>${item.item_name}</td>
+                                    <td class="text-center">${item.quantity} ${item.unit_type}</td>
+                                    <td class="text-end">₱${parseFloat(item.unit_price).toFixed(2)}</td>
+                                    <td class="text-end">₱${parseFloat(item.subtotal).toFixed(2)}</td>
+                                </tr>
+                            `);
+                        });
+                        
+                        $('.total-amount').text('₱' + parseFloat(receipt.total_amount).toFixed(2));
+                        
+                        receiptModal.show();
                     }
                 });
             });

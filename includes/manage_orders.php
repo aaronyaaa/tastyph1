@@ -1,134 +1,7 @@
 <?php
-session_start();
-include("../database/config.php");
-include("../database/data_session.php");
 
-// Ensure user is logged in as supplier
-$userId = $_SESSION['userId'] ?? null;
-$userType = $_SESSION['usertype'] ?? null;
-
-if (!$userId || $userType !== 'supplier') {
-    die("Unauthorized access. Please log in as a supplier.");
-}
-
-// Fetch supplier ID
-$stmt = $conn->prepare("
-    SELECT supplier_id 
-    FROM apply_supplier 
-    WHERE business_name = (SELECT business_name FROM users WHERE id = ?)
-");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$supplierResult = $stmt->get_result();
-$supplier = $supplierResult->fetch_assoc();
-$stmt->close();
-
-$supplierId = $supplier['supplier_id'] ?? null;
-if (!$supplierId) {
-    die("Supplier account not found.");
-}
-
-// Handle status filter
-$statusFilter = $_GET['status'] ?? '';
-$dateRange = $_GET['date_range'] ?? '';
-$dateCondition = '';
-$params = [$supplierId, $supplierId];
-$types = 'ii';
-
-if ($dateRange) {
-    if ($dateRange == 'today') {
-        $dateCondition = " AND DATE(o.order_date) = CURDATE()";
-    } elseif ($dateRange == 'last_week') {
-        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
-    } elseif ($dateRange == 'last_month') {
-        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)";
-    } elseif ($dateRange == 'last_year') {
-        $dateCondition = " AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)";
-    }
-}
-
-// Prepare query based on filter
-$sql = "
-    SELECT o.order_id, o.status AS order_status, o.order_date,
-       oi.quantity, oi.total_price AS item_price,
-       p.product_name, p.image_url AS product_image, p.product_id,
-       i.ingredient_name, i.image_url AS ingredient_image, i.ingredient_id,
-       v.variant_name, v.image_url AS variant_image, v.variant_id,
-       s.business_name AS seller_name, 
-       sup.business_name AS supplier_name,
-       u.first_name, u.last_name
-    FROM orders o
-    JOIN order_items oi ON o.order_id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.product_id
-    LEFT JOIN ingredients i ON oi.ingredient_id = i.ingredient_id
-    LEFT JOIN ingredient_variants v ON oi.variant_id = v.variant_id
-    LEFT JOIN apply_seller s ON p.seller_id = s.seller_id
-    LEFT JOIN apply_supplier sup ON i.supplier_id = sup.supplier_id
-    LEFT JOIN users u ON o.user_id = u.id
-    WHERE (i.supplier_id = ? OR v.ingredient_id IN (SELECT ingredient_id FROM ingredients WHERE supplier_id = ?))";
-
-if ($statusFilter) {
-    $sql .= " AND o.status = ?";
-    $params[] = $statusFilter;
-    $types .= 's';
-}
-$sql .= $dateCondition;
-
-// Prepare SQL statement
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("SQL Error: " . $conn->error);
-}
-
-$stmt->bind_param($types, ...$params);
-
-$stmt->execute();
-$result = $stmt->get_result();
-
-
-// Group orders by order_id and buyer
-$orders = [];
-while ($row = $result->fetch_assoc()) {
-    $orderId = $row['order_id'];
-    $buyerName = $row['first_name'] . ' ' . $row['last_name'];
-    if (!isset($orders[$orderId])) {
-        $orders[$orderId] = [
-            'buyer' => $buyerName,
-            'status' => $row['order_status'],
-            'order_date' => $row['order_date'],
-            'items' => [],
-            'total_amount' => 0
-        ];
-    }
-    $orders[$orderId]['items'][] = $row;
-    $orders[$orderId]['total_amount'] += $row['item_price'];
-}
-
-// Handle status update submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_POST['order_id'])) {
-    $newStatus = $_POST['update_status'];
-    $orderId = intval($_POST['order_id']);
-
-    // Check current status
-    $stmtCheck = $conn->prepare("SELECT status FROM orders WHERE order_id = ?");
-    $stmtCheck->bind_param("i", $orderId);
-    $stmtCheck->execute();
-    $currentStatus = $stmtCheck->get_result()->fetch_assoc()['status'];
-    $stmtCheck->close();
-
-    if (!in_array($currentStatus, ['Delivered', 'Cancelled'])) {
-        // Update the order status
-        $stmtUpdate = $conn->prepare("UPDATE orders SET status = ? WHERE order_id = ?");
-        $stmtUpdate->bind_param("si", $newStatus, $orderId);
-        $stmtUpdate->execute();
-        $stmtUpdate->close();
-    }
-
-    header("Location: manage_orders.php?updated=1");
-    exit();
-}
+require_once("../php_logic/manage_orders_logic.php");
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -199,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_PO
 
                     <!-- Bulk Status Update Form -->
                     <?php if (!in_array($orderData['status'], ['Delivered', 'Cancelled'])): ?>
-                        <form method="post" class="d-flex align-items-center justify-content-end">
+                        <form method="post" action="../php_logic/update_order_status.php" class="d-flex align-items-center justify-content-end">
                             <input type="hidden" name="order_id" value="<?= $orderId ?>">
                             <select class="form-select me-2" name="update_status" style="width: auto;">
                                 <?php foreach (['Pending', 'Order Confirmed', 'Packed', 'Delivered', 'Cancelled'] as $status): ?>
@@ -210,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_PO
                             </select>
                             <button class="btn btn-primary" type="submit">Update Order Status</button>
                         </form>
+
                     <?php else: ?>
                         <div class="text-muted">No further changes allowed</div>
                     <?php endif; ?>
@@ -258,5 +132,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_PO
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form[method="post"]');
+    
+    forms.forEach(form => {
+        if (form.querySelector('select[name="update_status"]')) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                fetch('../php_logic/update_order_status.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result.includes('success')) {
+                        window.location.reload();
+                    } else {
+                        alert('Error updating status: ' + result);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status. Please try again.');
+                });
+            });
+        }
+    });
+});
+</script>
 </body>
 </html>

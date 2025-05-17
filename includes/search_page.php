@@ -14,18 +14,18 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == 1) {
 
     // Update the SQL query in search_page.php to use LIKE with wildcards
     $sql = "
-(SELECT 'ingredient' AS type, ingredient_id AS id, ingredient_name AS name, description, price, image_url, 'ingredients_page.php' AS link 
-FROM ingredients WHERE ingredient_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
-UNION
-(SELECT 'product' AS type, product_id AS id, Product_name AS name, description, price, image_url, 'product_page.php' AS link 
-FROM products WHERE Product_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
-UNION
-(SELECT 'seller' AS type, seller_id AS id, business_name AS name, description, NULL AS price, profile_pics AS image_url, 'seller_page.php' AS link 
-FROM apply_seller WHERE business_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
-UNION
-(SELECT 'supplier' AS type, supplier_id AS id, business_name AS name, description, NULL AS price, profile_pics AS image_url, 'supplier_page.php' AS link 
-FROM apply_supplier WHERE business_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
-";
+    (SELECT 'ingredient' AS type, ingredient_id AS id, ingredient_name AS name, description, price, image_url, 'ingredients_page.php' AS link 
+    FROM ingredients WHERE ingredient_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
+    UNION
+    (SELECT 'product' AS type, product_id AS id, Product_name AS name, description, price, image_url, 'product_page.php' AS link 
+    FROM products WHERE Product_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
+    UNION
+    (SELECT 'seller' AS type, seller_id AS id, business_name AS name, description, NULL AS price, profile_pics AS image_url, 'seller_page.php' AS link 
+    FROM apply_seller WHERE business_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
+    UNION
+    (SELECT 'supplier' AS type, supplier_id AS id, business_name AS name, description, NULL AS price, profile_pics AS image_url, 'supplier_page.php' AS link 
+    FROM apply_supplier WHERE business_name LIKE ? OR description LIKE ? LIMIT ? OFFSET ?)
+    ";
 
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
@@ -95,7 +95,6 @@ while ($row = $total_result->fetch_row()) {
 
 // Calculate total pages
 $total_pages = ceil($total_count / $items_per_page);
-
 ?>
 
 <!DOCTYPE html>
@@ -104,11 +103,10 @@ $total_pages = ceil($total_count / $items_per_page);
 <head>
     <meta charset="UTF-8">
     <title>Search Results</title>
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/nav.css">
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/products.css">
-
 </head>
 
 <body>
@@ -143,6 +141,7 @@ $total_pages = ceil($total_count / $items_per_page);
                 </li>
             </ul>
         </nav>
+
         <!-- Display Products -->
         <div class="row mb-5">
             <?php
@@ -181,17 +180,16 @@ $total_pages = ceil($total_count / $items_per_page);
             if ($ingredients->num_rows > 0):
                 while ($row = $ingredients->fetch_assoc()): ?>
                     <div class="col-md-3 mb-3">
-                        <a href="ingredient_page.php?ingredient_id=<?= $row['ingredient_id']; ?>" class="ingredient-link">
-                            <div class="card">
-                                <img src="../uploads/<?= htmlspecialchars($row['image_url']); ?>" class="card-img-top" alt="<?= htmlspecialchars($row['ingredient_name']); ?>">
+                        <div class="card h-100">
+                            <a href="ingredient_page.php?ingredient_id=<?= $row['ingredient_id']; ?>" class="text-decoration-none text-dark">
+                                <img src="../uploads/<?= htmlspecialchars($row['image_url']); ?>" class="card-img-top" alt="<?= htmlspecialchars($row['ingredient_name']); ?>" style="height: 200px; object-fit: cover;">
                                 <div class="card-body">
                                     <h5 class="card-title"><?= htmlspecialchars($row['ingredient_name']); ?></h5>
-                                    <p><strong>₱<?= number_format($row['price'], 2); ?></strong></p>
-                                    <p><strong>Stock:</strong> <?= $row['quantity']; ?> </p>
+                                    <p class="card-text mb-1"><strong>₱<?= number_format($row['price'], 2); ?></strong></p>
+                                    <p class="card-text"><strong>Stock:</strong> <?= $row['quantity']; ?></p>
                                 </div>
-                            </div>
-                        </a>
-
+                            </a>
+                        </div>
                     </div>
                 <?php endwhile; ?>
             <?php else: ?>
@@ -199,15 +197,9 @@ $total_pages = ceil($total_count / $items_per_page);
             <?php endif; ?>
         </div>
 
-        <!-- Display Stores -->
-
-
-
     </div>
 
-
-
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/bootstrap.bundle.min.js"></script>
     <script src="../js/ajax.js"></script>
 
