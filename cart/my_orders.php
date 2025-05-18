@@ -8,6 +8,7 @@ if (!isset($_SESSION['userId'])) {
 }
 
 $userId = $_SESSION['userId'];
+$userType = $_SESSION['usertype'] ?? 'user';
 
 // Date filter logic
 $dateFilter = $_GET['date_filter'] ?? 'today';
@@ -25,13 +26,16 @@ switch ($dateFilter) {
     case 'last_year':
         $dateWhere = "AND o.order_date >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)";
         break;
+    case 'all':
+        $dateWhere = ""; // Show all
+        break;
     default:
         $dateWhere = ""; // Show all if unknown
 }
 
 $sql = "SELECT 
             o.order_id, o.status AS order_status, o.order_date,
-            oi.quantity, oi.total_price AS item_price,
+            oi.quantity, oi.total_price AS item_price, oi.variant_id, oi.product_id, oi.ingredient_id,
             p.product_name, p.image_url AS product_image, p.product_id,
             i.ingredient_name, i.image_url AS ingredient_image, i.ingredient_id,
             v.variant_name, v.image_url AS variant_image, v.variant_id,
@@ -55,11 +59,11 @@ if ($result->num_rows == 0) {
     die("No orders found.");
 }
 
-// Group by order, then by store
+// Group orders by order_id then by store name
 $orders = [];
 while ($row = $result->fetch_assoc()) {
     $orderId = $row['order_id'];
-    $storeName = $row['seller_name'] ?? $row['supplier_name'];
+    $storeName = $row['seller_name'] ?? $row['supplier_name'] ?? 'Unknown Store';
     if (!isset($orders[$orderId])) {
         $orders[$orderId] = [
             'order_status' => $row['order_status'],
@@ -77,127 +81,134 @@ while ($row = $result->fetch_assoc()) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>My Orders</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/index.css">
-    <link rel="stylesheet" href="../css/nav.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/index.css" />
+    <link rel="stylesheet" href="../css/nav.css" />
 </head>
 <body>
 <?php include("../includes/nav_" . strtolower($userType) . ".php"); ?>
 
 <div class="container mt-5">
     <h2 class="mb-4">My Orders</h2>
+
     <form method="get" class="mb-4">
         <div class="row g-2 align-items-center">
             <div class="col-auto">
                 <label for="date_filter" class="col-form-label">Show orders from:</label>
             </div>
             <div class="col-auto">
-            <select name="date_filter" id="date_filter" class="form-select" onchange="this.form.submit()">
-    <option value="today" <?= $dateFilter == 'today' ? 'selected' : '' ?>>Today</option>
-    <option value="last_week" <?= $dateFilter == 'last_week' ? 'selected' : '' ?>>Last 7 Days</option>
-    <option value="last_month" <?= $dateFilter == 'last_month' ? 'selected' : '' ?>>Last Month</option>
-    <option value="last_year" <?= $dateFilter == 'last_year' ? 'selected' : '' ?>>Last Year</option>
-    <option value="all" <?= $dateFilter == 'all' ? 'selected' : '' ?>>All Time</option>
-</select>
-
+                <select name="date_filter" id="date_filter" class="form-select" onchange="this.form.submit()">
+                    <option value="today" <?= $dateFilter == 'today' ? 'selected' : '' ?>>Today</option>
+                    <option value="last_week" <?= $dateFilter == 'last_week' ? 'selected' : '' ?>>Last 7 Days</option>
+                    <option value="last_month" <?= $dateFilter == 'last_month' ? 'selected' : '' ?>>Last Month</option>
+                    <option value="last_year" <?= $dateFilter == 'last_year' ? 'selected' : '' ?>>Last Year</option>
+                    <option value="all" <?= $dateFilter == 'all' ? 'selected' : '' ?>>All Time</option>
+                </select>
             </div>
         </div>
     </form>
-    <div class="accordion" id="orderAccordion">
-    <?php 
-    $orderIndex = 0; 
-    $maxVisible = 5; // show only 5 initially
-    ?>
-    <?php foreach ($orders as $orderId => $orderData): ?>
-        <div class="accordion-item <?= $orderIndex >= $maxVisible ? 'extra-order d-none' : '' ?>" data-order-index="<?= $orderIndex ?>">
-            <h2 class="accordion-header" id="headingOrder<?= $orderIndex ?>">
-                <button class="accordion-button <?= $orderIndex > 0 ? 'collapsed' : '' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrder<?= $orderIndex ?>" aria-expanded="<?= $orderIndex == 0 ? 'true' : 'false' ?>" aria-controls="collapseOrder<?= $orderIndex ?>">
-                    Order #<?= $orderId ?> (<?= date('M d, Y', strtotime($orderData['order_date'] ?? '')) ?>) 
-                    (Status: <?= htmlspecialchars($orderData['order_status']) ?>)
-                </button>
-            </h2>
-            <div id="collapseOrder<?= $orderIndex ?>" class="accordion-collapse collapse <?= $orderIndex == 0 ? 'show' : '' ?>" aria-labelledby="headingOrder<?= $orderIndex ?>" data-bs-parent="#orderAccordion">
-                <div class="accordion-body">
-                    <?php foreach ($orderData['stores'] as $storeName => $items): ?>
-                        <h5 class="d-flex justify-content-between align-items-center">
-    <span><?= htmlspecialchars($storeName) ?></span>
-    <button type="button" 
-            class="btn btn-sm btn-outline-primary view-receipt-btn" 
-            data-order-id="<?= $orderId ?>" 
-            data-store-name="<?= htmlspecialchars($storeName) ?>" 
-            data-bs-toggle="modal" data-bs-target="#receiptModal">
-        View Receipt
-    </button>
-</h5>
 
-                        <?php foreach ($items as $row): ?>
-                            <?php
-                                $itemName = $row['variant_name'] ?? $row['product_name'] ?? $row['ingredient_name'];
-                                $itemImage = $row['variant_image'] ?? $row['product_image'] ?? $row['ingredient_image'];
-                                $itemId = $row['variant_id'] ?? $row['product_id'] ?? $row['ingredient_id'];
-                                $itemType = $row['variant_id'] ? 'variant' : ($row['product_id'] ? 'product' : 'ingredient');
-                            ?>
-                            
-                            <div class="d-flex border-top py-2">
-                                <img src="../uploads/<?= htmlspecialchars($itemImage); ?>" 
-                                    class="img-thumbnail me-3" style="width: 100px; height: 100px;">
-                                <div class="flex-grow-1">
-                                    <h6>
-                                        <a href="item_details.php?item_id=<?= $itemId ?>&type=<?= $itemType ?>&order_id=<?= $row['order_id']; ?>" 
-                                        class="text-decoration-none">
-                                            <?= htmlspecialchars($itemName); ?>
-                                        </a>
-                                    </h6>
-                                    <p class="text-muted mb-1">Qty: <?= htmlspecialchars($row['quantity']); ?></p>
-                                    <p class="mb-0">₱<?= number_format($row['item_price'], 2); ?></p>
-                                    <p class="mt-2">
-                                        <span class="badge 
-                                            <?php 
-                                                if ($row['order_status'] === 'Pending') echo 'bg-warning';
-                                                elseif ($row['order_status'] === 'Shipped') echo 'bg-primary';
-                                                elseif ($row['order_status'] === 'Delivered') echo 'bg-success';
-                                                else echo 'bg-secondary'; 
-                                            ?>">
-                                            <?= htmlspecialchars($row['order_status']); ?>
-                                        </span>
-                                    </p>
+    <div class="accordion" id="orderAccordion">
+        <?php
+        $orderIndex = 0;
+        $maxVisible = 5; // Show only 5 initially
+        ?>
+        <?php foreach ($orders as $orderId => $orderData): ?>
+            <div class="accordion-item <?= $orderIndex >= $maxVisible ? 'extra-order d-none' : '' ?>" data-order-index="<?= $orderIndex ?>">
+                <h2 class="accordion-header" id="headingOrder<?= $orderIndex ?>">
+                    <button class="accordion-button <?= $orderIndex > 0 ? 'collapsed' : '' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrder<?= $orderIndex ?>" aria-expanded="<?= $orderIndex == 0 ? 'true' : 'false' ?>" aria-controls="collapseOrder<?= $orderIndex ?>">
+                        Order #<?= $orderId ?> (<?= date('M d, Y', strtotime($orderData['order_date'] ?? '')) ?>)
+                        (Status: <?= htmlspecialchars($orderData['order_status']) ?>)
+                    </button>
+                </h2>
+                <div id="collapseOrder<?= $orderIndex ?>" class="accordion-collapse collapse <?= $orderIndex == 0 ? 'show' : '' ?>" aria-labelledby="headingOrder<?= $orderIndex ?>" data-bs-parent="#orderAccordion">
+                    <div class="accordion-body">
+                        <?php foreach ($orderData['stores'] as $storeName => $items): ?>
+                            <h5 class="d-flex justify-content-between align-items-center">
+                                <span><?= htmlspecialchars($storeName) ?></span>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary view-receipt-btn" 
+                                        data-order-id="<?= $orderId ?>" 
+                                        data-store-name="<?= htmlspecialchars($storeName) ?>" 
+                                        data-bs-toggle="modal" data-bs-target="#receiptModal">
+                                    View Receipt
+                                </button>
+                            </h5>
+
+                            <?php foreach ($items as $row): ?>
+                                <?php
+                                    // Compose the display name showing variant if present
+                                    if (!empty($row['variant_name'])) {
+                                        $itemName = $row['ingredient_name'] . ' - ' . $row['variant_name'];
+                                    } else {
+                                        $itemName = $row['product_name'] ?? $row['ingredient_name'];
+                                    }
+                                    $itemImage = $row['variant_image'] ?? $row['product_image'] ?? $row['ingredient_image'];
+                                    $itemId = $row['variant_id'] ?? $row['product_id'] ?? $row['ingredient_id'];
+                                    $itemType = !empty($row['variant_id']) ? 'variant' : (!empty($row['product_id']) ? 'product' : 'ingredient');
+                                ?>
+                                <div class="d-flex border-top py-2">
+                                    <img src="../uploads/<?= htmlspecialchars($itemImage); ?>" 
+                                         class="img-thumbnail me-3" style="width: 100px; height: 100px;">
+                                    <div class="flex-grow-1">
+                                        <h6>
+                                            <a href="item_details.php?item_id=<?= $itemId ?>&type=<?= $itemType ?>&order_id=<?= $row['order_id']; ?>" 
+                                               class="text-decoration-none">
+                                                <?= htmlspecialchars($itemName); ?>
+                                            </a>
+                                        </h6>
+                                        <p class="text-muted mb-1">Qty: <?= htmlspecialchars($row['quantity']); ?></p>
+                                        <p class="mb-0">₱<?= number_format($row['item_price'], 2); ?></p>
+                                        <p class="mt-2">
+                                            <span class="badge 
+                                                <?php 
+                                                    if ($row['order_status'] === 'Pending') echo 'bg-warning';
+                                                    elseif ($row['order_status'] === 'Shipped') echo 'bg-primary';
+                                                    elseif ($row['order_status'] === 'Delivered') echo 'bg-success';
+                                                    else echo 'bg-secondary'; 
+                                                ?>">
+                                                <?= htmlspecialchars($row['order_status']); ?>
+                                            </span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php endforeach; ?>
                         <?php endforeach; ?>
-                    <?php endforeach; ?>
+                    </div>
                 </div>
             </div>
-        </div>
-        <?php $orderIndex++; ?>
-    <?php endforeach; ?>
-</div>
-<!-- Receipt Modal -->
-<div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="receiptModalLabel">Receipt Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="receiptContent">
-          <p class="text-center">Loading receipt...</p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
+            <?php $orderIndex++; ?>
+        <?php endforeach; ?>
     </div>
-  </div>
-</div>
 
-<?php if(count($orders) > $maxVisible): ?>
-    <div class="text-center mt-3">
-        <button id="showMoreBtn" class="btn btn-outline-primary">Show More</button>
+    <!-- Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="receiptModalLabel">Receipt Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="receiptContent">
+              <p class="text-center">Loading receipt...</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
-<?php endif; ?>
+
+    <?php if(count($orders) > $maxVisible): ?>
+        <div class="text-center mt-3">
+            <button id="showMoreBtn" class="btn btn-outline-primary">Show More</button>
+        </div>
+    <?php endif; ?>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -213,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const receiptModal = document.getElementById('receiptModal');
@@ -222,29 +234,26 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function () {
             const orderId = this.getAttribute('data-order-id');
 
-            // Show loading text
             receiptContent.innerHTML = '<p class="text-center">Loading receipt...</p>';
 
-            fetch(`fetch_receipt.php?order_id=${orderId}`)
+            fetch(`../helpers/fetch_receipt.php?order_id=${orderId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         const receipt = data.receipt;
                         const items = data.items;
 
-                        // Build receipt HTML
                         let html = `
-                        <h6>Receipt Number: ${receipt.receipt_number}</h6>
-                        <p><strong>Issue Date:</strong> ${receipt.issue_date}</p>
+                        <h6>Receipt Number: ${receipt.receipt_id}</h6>
+                        <p><strong>Issue Date:</strong> ${receipt.payment_date}</p>
                         <p><strong>Buyer:</strong> ${receipt.buyer_name}<br>
                            <strong>Address:</strong> ${receipt.buyer_address}<br>
                            <strong>Contact:</strong> ${receipt.buyer_contact}</p>
                         <p><strong>Supplier:</strong> ${receipt.supplier_name}<br>
                            <strong>Address:</strong> ${receipt.supplier_address}<br>
-                           <strong>Contact:</strong> ${receipt.supplier_contact}<br>
-                           <strong>TIN:</strong> ${receipt.supplier_tin}</p>
-                        <p><strong>Payment Method:</strong> ${receipt.payment_method}<br>
-                           <strong>Payment Status:</strong> ${receipt.payment_status}</p>
+                           <strong>Contact:</strong> ${receipt.supplier_contact}</p>
+                        <p><strong>Payment Method:</strong> ${receipt.payment_method}</p>
+                        <p><strong>Total Paid:</strong> ₱${parseFloat(receipt.total_paid).toFixed(2)}</p>
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
@@ -256,22 +265,23 @@ document.addEventListener('DOMContentLoaded', function () {
                             </thead>
                             <tbody>
                         `;
+
                         items.forEach(item => {
                             html += `
                                 <tr>
-                                    <td>${item.item_name}</td>
+                                    <td>${item.description}</td>
                                     <td>${item.quantity} ${item.unit_type}</td>
                                     <td>₱${parseFloat(item.unit_price).toFixed(2)}</td>
-                                    <td>₱${parseFloat(item.subtotal).toFixed(2)}</td>
+                                    <td>₱${parseFloat(item.total_price).toFixed(2)}</td>
                                 </tr>
                             `;
                         });
+
                         html += `
                             </tbody>
                         </table>
-                        <p><strong>Total Amount:</strong> ₱${parseFloat(receipt.total_amount).toFixed(2)}</p>
-                        <p><strong>Notes:</strong> ${receipt.notes || 'None'}</p>
                         `;
+
                         receiptContent.innerHTML = html;
                     } else {
                         receiptContent.innerHTML = `<p class="text-danger">Receipt not found for this order.</p>`;
@@ -284,7 +294,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
